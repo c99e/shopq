@@ -107,6 +107,134 @@ async function handlePageCreate(parsed: ParsedArgs): Promise<void> {
   }
 }
 
+const PAGES_QUERY = `query PageList($first: Int!, $after: String) {
+  pages(first: $first, after: $after) {
+    edges {
+      node {
+        id
+        title
+        handle
+        isPublished
+        bodySummary
+        createdAt
+        metafields(first: 10, namespace: "global") {
+          edges {
+            node {
+              namespace
+              key
+              value
+            }
+          }
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}`;
+
+interface MetafieldNode {
+  namespace: string;
+  key: string;
+  value: string;
+}
+
+function extractSeo(metafields: { edges: Array<{ node: MetafieldNode }> }): { title: string | null; description: string | null } {
+  let title: string | null = null;
+  let description: string | null = null;
+  for (const { node } of metafields.edges) {
+    if (node.namespace === "global" && node.key === "title_tag") title = node.value;
+    if (node.namespace === "global" && node.key === "description_tag") description = node.value;
+  }
+  return { title, description };
+}
+
+async function handlePageList(parsed: ParsedArgs): Promise<void> {
+  try {
+    const config = resolveConfig(parsed.flags.store);
+    const protocol = process.env.MISTY_PROTOCOL === "http" ? "http" : "https";
+    const client = createClient({ ...config, protocol });
+
+    let limit = parsed.flags.limit ? parseInt(parsed.flags.limit, 10) : 50;
+    if (limit > 250) limit = 250;
+
+    const variables: Record<string, unknown> = { first: limit };
+    if (parsed.flags.cursor) variables.after = parsed.flags.cursor;
+
+    const result = await client.query<{
+      pages: {
+        edges: Array<{
+          node: {
+            id: string;
+            title: string;
+            handle: string;
+            isPublished: boolean;
+            bodySummary: string;
+            createdAt: string;
+            metafields: { edges: Array<{ node: MetafieldNode }> };
+          };
+        }>;
+        pageInfo: { hasNextPage: boolean; endCursor: string };
+      };
+    }>(PAGES_QUERY, variables);
+
+    const pages = result.pages.edges.map((e) => {
+      const seo = extractSeo(e.node.metafields);
+      return {
+        id: e.node.id,
+        title: e.node.title,
+        handle: e.node.handle,
+        published: e.node.isPublished,
+        bodySummary: e.node.bodySummary,
+        seo,
+        createdAt: e.node.createdAt,
+      };
+    });
+
+    const pageInfo = result.pages.pageInfo;
+
+    if (parsed.flags.json) {
+      formatOutput(pages, [], { json: true, noColor: parsed.flags.noColor, pageInfo });
+      return;
+    }
+
+    const columns = [
+      { key: "id", header: "ID" },
+      { key: "title", header: "Title" },
+      { key: "handle", header: "Handle" },
+      { key: "published", header: "Published" },
+      { key: "seoTitle", header: "SEO Title" },
+      { key: "createdAt", header: "Created" },
+    ];
+
+    const tableData = pages.map((p) => ({
+      ...p,
+      seoTitle: p.seo.title ?? "",
+    }));
+
+    formatOutput(tableData, columns, { json: false, noColor: parsed.flags.noColor, pageInfo });
+  } catch (err) {
+    if (err instanceof ConfigError) {
+      formatError(err.message);
+      process.exitCode = 1;
+      return;
+    }
+    if (err instanceof GraphQLError) {
+      formatError(err.message);
+      process.exitCode = 1;
+      return;
+    }
+    throw err;
+  }
+}
+
+register("page", "Page management", "list", {
+  description: "List static store pages",
+  handler: handlePageList,
+});
+
 register("page", "Page management", "create", {
   description: "Create a static store page",
   handler: handlePageCreate,
