@@ -512,6 +512,124 @@ async function rollbackProduct(client: ReturnType<typeof createClient>, productI
   }
 }
 
+// --- product update ---
+
+const PRODUCT_UPDATE_MUTATION = `mutation ProductUpdate($input: ProductInput!) {
+  productUpdate(input: $input) {
+    product { id title status productType vendor }
+    userErrors { field message }
+  }
+}`;
+
+const UPDATE_FLAGS = ["title", "description", "type", "vendor", "tags", "status"] as const;
+
+async function handleProductUpdate(parsed: ParsedArgs): Promise<void> {
+  const idOrTitle = parsed.args.join(" ");
+  if (!idOrTitle) {
+    formatError("Usage: misty product update <id-or-title> [--title ...] [--status ...] ...");
+    process.exitCode = 1;
+    return;
+  }
+
+  // Check at least one update flag is provided
+  const hasUpdateFlag = UPDATE_FLAGS.some((f) => parsed.flags[f] !== undefined);
+  if (!hasUpdateFlag) {
+    formatError("Provide at least one update flag: --title, --description, --type, --vendor, --tags, --status");
+    process.exitCode = 2;
+    return;
+  }
+
+  try {
+    const config = resolveConfig(parsed.flags.store);
+    const protocol = process.env.MISTY_PROTOCOL === "http" ? "http" : "https";
+    const client = createClient({ ...config, protocol });
+
+    // Resolve product ID
+    const resolved = resolveProductId(idOrTitle);
+    let productGid: string;
+
+    if (resolved.type === "gid") {
+      productGid = resolved.id;
+    } else {
+      const searchResult = await client.query<ProductSearchResponse>(PRODUCT_SEARCH_QUERY, {
+        query: `title:${resolved.title}`,
+      });
+      const matches = searchResult.products.edges;
+      if (matches.length === 0) {
+        formatError(`Product "${idOrTitle}" not found`);
+        process.exitCode = 1;
+        return;
+      }
+      if (matches.length > 1) {
+        const columns = [
+          { key: "id", header: "ID" },
+          { key: "title", header: "Title" },
+          { key: "status", header: "Status" },
+        ];
+        formatOutput(matches.map((e) => e.node), columns, { json: false, noColor: parsed.flags.noColor });
+        process.exitCode = 1;
+        return;
+      }
+      productGid = matches[0]!.node.id;
+    }
+
+    // Build input with only provided fields
+    const input: Record<string, unknown> = { id: productGid };
+    if (parsed.flags.title !== undefined) input.title = parsed.flags.title;
+    if (parsed.flags.description !== undefined) input.descriptionHtml = parsed.flags.description;
+    if (parsed.flags.type !== undefined) input.productType = parsed.flags.type;
+    if (parsed.flags.vendor !== undefined) input.vendor = parsed.flags.vendor;
+    if (parsed.flags.tags !== undefined) input.tags = parsed.flags.tags.split(",").map((t: string) => t.trim());
+    if (parsed.flags.status !== undefined) input.status = parsed.flags.status.toUpperCase();
+
+    const result = await client.query<{
+      productUpdate: {
+        product: { id: string; title: string; status: string; productType: string; vendor: string } | null;
+        userErrors: UserError[];
+      };
+    }>(PRODUCT_UPDATE_MUTATION, { input });
+
+    if (result.productUpdate.userErrors.length > 0) {
+      formatError(result.productUpdate.userErrors.map((e) => e.message).join("; "));
+      process.exitCode = 1;
+      return;
+    }
+
+    const product = result.productUpdate.product!;
+
+    if (parsed.flags.json) {
+      formatOutput(product, [], { json: true, noColor: parsed.flags.noColor });
+    } else {
+      const label = (name: string) => parsed.flags.noColor ? name : `\x1b[1m${name}\x1b[0m`;
+      const lines = [
+        `${label("ID")}: ${product.id}`,
+        `${label("Title")}: ${product.title}`,
+        `${label("Status")}: ${product.status}`,
+        `${label("Type")}: ${product.productType}`,
+        `${label("Vendor")}: ${product.vendor}`,
+      ];
+      process.stdout.write(lines.join("\n") + "\n");
+    }
+  } catch (err) {
+    if (err instanceof ConfigError) {
+      formatError(err.message);
+      process.exitCode = 1;
+      return;
+    }
+    if (err instanceof GraphQLError) {
+      formatError(err.message);
+      process.exitCode = 1;
+      return;
+    }
+    throw err;
+  }
+}
+
+register("product", "Product management", "update", {
+  description: "Update a product by ID or title",
+  handler: handleProductUpdate,
+});
+
 register("product", "Product management", "create", {
   description: "Create a product with optional variant support",
   handler: handleProductCreate,
