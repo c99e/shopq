@@ -61,11 +61,13 @@ describe("misty CLI", () => {
   });
 
   test("<resource> --help prints resource-level help and exits 0", async () => {
-    // With empty registry, resource help should still work for known resources
-    // For now, unknown resource with --help should still exit 2
-    // Actually, since no resources are registered, this should error
-    const { stderr, exitCode } = await run(["product", "--help"]);
-    // Unknown resource, even with --help
+    const { stdout, exitCode } = await run(["product", "--help"]);
+    expect(stdout).toContain("list");
+    expect(exitCode).toBe(0);
+  });
+
+  test("unknown resource --help exits 2", async () => {
+    const { stderr, exitCode } = await run(["nonexistent", "--help"]);
     expect(exitCode).toBe(2);
   });
 

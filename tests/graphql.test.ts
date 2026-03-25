@@ -199,6 +199,33 @@ describe("createClient", () => {
     expect(attempts).toBe(3);
   });
 
+  test("times out when server never responds", async () => {
+    const srv = startServer(async () => {
+      // Hang forever
+      await new Promise(() => {});
+      return new Response("never");
+    });
+
+    const client = createClient({
+      store: `localhost:${srv.port}`,
+      accessToken: "shpat_test",
+      protocol: "http",
+      timeoutMs: 100,
+    });
+
+    await expect(client.query("{ shop { name } }")).rejects.toThrow("Request timed out after 100ms");
+  });
+
+  test("uses default timeout when timeoutMs is not specified", () => {
+    // Just verify the client can be created without timeoutMs (default 30s)
+    const client = createClient({
+      store: "localhost:9999",
+      accessToken: "shpat_test",
+      protocol: "http",
+    });
+    expect(client).toBeDefined();
+  });
+
   test("gives up after max retries on 429", async () => {
     const srv = startServer(() => {
       return new Response("Too Many Requests", {

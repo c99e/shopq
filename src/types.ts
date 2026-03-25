@@ -4,6 +4,25 @@ export interface GlobalFlags {
   version: boolean;
   noColor: boolean;
   store?: string;
+  vars?: string;
+  file?: string;
+  status?: string;
+  type?: string;
+  vendor?: string;
+  limit?: string;
+  cursor?: string;
+  title?: string;
+  handle?: string;
+  tags?: string;
+  description?: string;
+  variants?: string;
+  options?: string;
+  yes?: boolean;
+  body?: string;
+  "body-file"?: string;
+  published?: string;
+  "seo-title"?: string;
+  "seo-desc"?: string;
 }
 
 export interface ParsedArgs {
