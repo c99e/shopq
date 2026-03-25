@@ -172,7 +172,91 @@ async function handleMenuGet(parsed: ParsedArgs): Promise<void> {
   }
 }
 
+const MENUS_LIST_QUERY = `query MenuList {
+  menus(first: 250) {
+    edges {
+      node {
+        id
+        title
+        handle
+        itemsCount { count }
+        items {
+          ${MENU_ITEMS_FRAGMENT}
+        }
+      }
+    }
+  }
+}`;
+
+async function handleMenuList(parsed: ParsedArgs): Promise<void> {
+  try {
+    const config = resolveConfig(parsed.flags.store);
+    const protocol = process.env.MISTY_PROTOCOL === "http" ? "http" : "https";
+    const client = createClient({ ...config, protocol });
+
+    const result = await client.query<{
+      menus: { edges: Array<{ node: Menu }> };
+    }>(MENUS_LIST_QUERY, {});
+
+    const menus = result.menus.edges.map((e) => e.node);
+
+    if (parsed.flags.json) {
+      const data = menus.map((m) => ({
+        id: m.id,
+        title: m.title,
+        handle: m.handle,
+        itemCount: m.itemsCount.count,
+        items: m.items,
+      }));
+      formatOutput(data, [], { json: true, noColor: parsed.flags.noColor });
+      return;
+    }
+
+    // Table output: one section per menu with indented items
+    const label = (name: string) =>
+      parsed.flags.noColor ? name : `\x1b[1m${name}\x1b[0m`;
+    const lines: string[] = [];
+
+    for (let i = 0; i < menus.length; i++) {
+      const menu = menus[i]!;
+      if (i > 0) lines.push("");
+      lines.push(`${label("ID")}: ${menu.id}`);
+      lines.push(`${label("Title")}: ${menu.title}`);
+      lines.push(`${label("Handle")}: ${menu.handle}`);
+      lines.push(`${label("Items Count")}: ${menu.itemsCount.count}`);
+
+      if (menu.items.length > 0) {
+        lines.push(`${label("Items")}:`);
+        const rows: Array<{ indent: string; title: string; url: string; type: string }> = [];
+        flattenItems(menu.items, 0, rows);
+        for (const row of rows) {
+          lines.push(`  ${row.indent}${row.title}  (${row.type})  ${row.url}`);
+        }
+      }
+    }
+
+    process.stdout.write(lines.join("\n") + "\n");
+  } catch (err) {
+    if (err instanceof ConfigError) {
+      formatError(err.message);
+      process.exitCode = 1;
+      return;
+    }
+    if (err instanceof GraphQLError) {
+      formatError(err.message);
+      process.exitCode = 1;
+      return;
+    }
+    throw err;
+  }
+}
+
 register("menu", "Navigation menu management", "get", {
   description: "Get a single menu by ID or handle",
   handler: handleMenuGet,
+});
+
+register("menu", "Navigation menu management", "list", {
+  description: "List all navigation menus",
+  handler: handleMenuList,
 });
