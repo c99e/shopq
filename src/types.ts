@@ -6,6 +6,11 @@ export interface GlobalFlags {
   store?: string;
   vars?: string;
   file?: string;
+  status?: string;
+  type?: string;
+  vendor?: string;
+  limit?: string;
+  cursor?: string;
 }
 
 export interface ParsedArgs {

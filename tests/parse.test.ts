@@ -105,10 +105,18 @@ describe("parseArgs", () => {
     expect(result.verb).toBe("list");
   });
 
-  test("unknown flags are passed through in args", () => {
+  test("known resource flags are parsed into flags", () => {
     const result = parseArgs(["product", "list", "--status", "active"]);
     expect(result.resource).toBe("product");
     expect(result.verb).toBe("list");
-    expect(result.args).toEqual(["--status", "active"]);
+    expect(result.flags.status).toBe("active");
+    expect(result.args).toEqual([]);
+  });
+
+  test("unknown flags are passed through in args", () => {
+    const result = parseArgs(["product", "list", "--unknown", "value"]);
+    expect(result.resource).toBe("product");
+    expect(result.verb).toBe("list");
+    expect(result.args).toEqual(["--unknown", "value"]);
   });
 });

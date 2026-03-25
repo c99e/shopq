@@ -37,6 +37,31 @@ export function parseArgs(argv: string[]): ParsedArgs {
       flags.file = argv[i]!;
     } else if (arg?.startsWith("--file=")) {
       flags.file = arg.slice("--file=".length);
+    } else if (arg === "--status") {
+      i++;
+      flags.status = argv[i]!;
+    } else if (arg?.startsWith("--status=")) {
+      flags.status = arg.slice("--status=".length);
+    } else if (arg === "--type") {
+      i++;
+      flags.type = argv[i]!;
+    } else if (arg?.startsWith("--type=")) {
+      flags.type = arg.slice("--type=".length);
+    } else if (arg === "--vendor") {
+      i++;
+      flags.vendor = argv[i]!;
+    } else if (arg?.startsWith("--vendor=")) {
+      flags.vendor = arg.slice("--vendor=".length);
+    } else if (arg === "--limit") {
+      i++;
+      flags.limit = argv[i]!;
+    } else if (arg?.startsWith("--limit=")) {
+      flags.limit = arg.slice("--limit=".length);
+    } else if (arg === "--cursor") {
+      i++;
+      flags.cursor = argv[i]!;
+    } else if (arg?.startsWith("--cursor=")) {
+      flags.cursor = arg.slice("--cursor=".length);
     } else if (arg) {
       positional.push(arg);
     }
