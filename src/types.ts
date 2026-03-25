@@ -4,6 +4,8 @@ export interface GlobalFlags {
   version: boolean;
   noColor: boolean;
   store?: string;
+  vars?: string;
+  file?: string;
 }
 
 export interface ParsedArgs {

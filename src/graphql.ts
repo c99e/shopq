@@ -7,8 +7,15 @@ export interface ClientConfig {
   maxRetries?: number;
 }
 
+export interface RawGraphQLResponse {
+  data?: any;
+  errors?: Array<{ message: string; [key: string]: any }>;
+  extensions?: any;
+}
+
 export interface GraphQLClient {
   query<T = any>(query: string, variables?: Record<string, unknown>): Promise<T>;
+  rawQuery(query: string, variables?: Record<string, unknown>): Promise<RawGraphQLResponse>;
 }
 
 export class GraphQLError extends Error {
@@ -55,47 +62,54 @@ export function createClient(config: ClientConfig): GraphQLClient {
   const { store, accessToken, protocol = "https", maxRetries = 5 } = config;
   const endpoint = `${protocol}://${store}/admin/api/${API_VERSION}/graphql.json`;
 
-  return {
-    async query<T = any>(query: string, variables?: Record<string, unknown>): Promise<T> {
-      const body = JSON.stringify({ query, variables });
+  async function fetchRaw(query: string, variables?: Record<string, unknown>): Promise<RawGraphQLResponse> {
+    const body = JSON.stringify({ query, variables });
 
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Shopify-Access-Token": accessToken,
-          },
-          body,
-        });
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": accessToken,
+        },
+        body,
+      });
 
-        if (response.status === 429) {
-          if (attempt === maxRetries) {
-            const text = await response.text();
-            throw new HttpError(429, text);
-          }
-          const retryAfter = response.headers.get("Retry-After");
-          const waitMs = retryAfter ? parseFloat(retryAfter) * 1000 : Math.min(1000 * 2 ** attempt, 30000);
-          await sleep(waitMs);
-          continue;
-        }
-
-        if (!response.ok) {
+      if (response.status === 429) {
+        if (attempt === maxRetries) {
           const text = await response.text();
-          throw new HttpError(response.status, text);
+          throw new HttpError(429, text);
         }
-
-        const json = await response.json() as { data?: T; errors?: Array<{ message: string }> };
-
-        if (json.errors && json.errors.length > 0) {
-          throw new GraphQLError(json.errors);
-        }
-
-        return json.data as T;
+        const retryAfter = response.headers.get("Retry-After");
+        const waitMs = retryAfter ? parseFloat(retryAfter) * 1000 : Math.min(1000 * 2 ** attempt, 30000);
+        await sleep(waitMs);
+        continue;
       }
 
-      // Should not reach here
-      throw new Error("Unexpected: exhausted retries");
+      if (!response.ok) {
+        const text = await response.text();
+        throw new HttpError(response.status, text);
+      }
+
+      return await response.json() as RawGraphQLResponse;
+    }
+
+    throw new Error("Unexpected: exhausted retries");
+  }
+
+  return {
+    async query<T = any>(query: string, variables?: Record<string, unknown>): Promise<T> {
+      const json = await fetchRaw(query, variables);
+
+      if (json.errors && json.errors.length > 0) {
+        throw new GraphQLError(json.errors);
+      }
+
+      return json.data as T;
+    },
+
+    async rawQuery(query: string, variables?: Record<string, unknown>): Promise<RawGraphQLResponse> {
+      return fetchRaw(query, variables);
     },
   };
 }

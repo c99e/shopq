@@ -27,6 +27,16 @@ export function parseArgs(argv: string[]): ParsedArgs {
       flags.store = argv[i]!;
     } else if (arg?.startsWith("--store=")) {
       flags.store = arg.slice("--store=".length);
+    } else if (arg === "--vars") {
+      i++;
+      flags.vars = argv[i]!;
+    } else if (arg?.startsWith("--vars=")) {
+      flags.vars = arg.slice("--vars=".length);
+    } else if (arg === "--file") {
+      i++;
+      flags.file = argv[i]!;
+    } else if (arg?.startsWith("--file=")) {
+      flags.file = arg.slice("--file=".length);
     } else if (arg) {
       positional.push(arg);
     }

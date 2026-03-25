@@ -39,8 +39,25 @@ export async function run(argv: string[]): Promise<void> {
   }
 
   if (!parsed.verb) {
+    // Check for a default handler (e.g., `misty gql <query>`)
+    const defaultCommand = resource.verbs.get("_default");
+    if (defaultCommand) {
+      await defaultCommand.handler(parsed);
+      return;
+    }
     const help = resourceHelp(parsed.resource);
     if (help) console.log(help);
+    return;
+  }
+
+  // Check for a default handler first — if the resource has _default,
+  // the "verb" is actually an argument (e.g., `misty gql "{ shop { name } }"`)
+  const defaultCommand = resource.verbs.get("_default");
+  if (defaultCommand) {
+    // Shift verb back into args
+    parsed.args = [parsed.verb, ...parsed.args];
+    parsed.verb = undefined;
+    await defaultCommand.handler(parsed);
     return;
   }
 
