@@ -5,7 +5,7 @@ A zero-dependency Shopify Admin CLI built on [Bun](https://bun.sh). Manage produ
 ## Prerequisites
 
 - [Bun](https://bun.sh) v1.3+
-- A Shopify store with a [Custom App access token](https://shopify.dev/docs/apps/auth/admin-app-access-tokens) that has the required Admin API scopes
+- A Shopify store with a [Dev Dashboard app](https://shopify.dev/docs/apps/build/authentication-authorization/client-credentials) and its Client ID / Client Secret
 
 ## Setup
 
@@ -19,14 +19,16 @@ bun install
 
 ```bash
 export MISTY_STORE="your-store.myshopify.com"
-export MISTY_ACCESS_TOKEN="shpat_xxxxx"
+export MISTY_CLIENT_ID="your-client-id"
+export MISTY_CLIENT_SECRET="your-client-secret"
 ```
 
 Or create a `.env` file:
 
 ```
 MISTY_STORE=your-store.myshopify.com
-MISTY_ACCESS_TOKEN=shpat_xxxxx
+MISTY_CLIENT_ID=your-client-id
+MISTY_CLIENT_SECRET=your-client-secret
 ```
 
 ## Usage

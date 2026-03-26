@@ -20,7 +20,8 @@ async function run(args: string[], env?: Record<string, string>) {
 describe("misty config show", () => {
   const validEnv = {
     MISTY_STORE: "my-store.myshopify.com",
-    MISTY_ACCESS_TOKEN: "shpat_abcdef1234567890",
+    MISTY_CLIENT_ID: "client-id-abcdef1234567890",
+    MISTY_CLIENT_SECRET: "client-secret-abcdef1234567890",
   };
 
   test("prints store domain in table output", async () => {
@@ -34,12 +35,22 @@ describe("misty config show", () => {
     expect(stdout).toContain("2026-01");
   });
 
-  test("never prints full access token in stdout", async () => {
+  test("never prints full client ID in stdout", async () => {
     const { stdout } = await run(["config", "show"], validEnv);
-    expect(stdout).not.toContain("shpat_abcdef1234567890");
+    expect(stdout).not.toContain("client-id-abcdef1234567890");
   });
 
-  test("masks the access token showing only last 4 chars", async () => {
+  test("never prints full client secret in stdout", async () => {
+    const { stdout } = await run(["config", "show"], validEnv);
+    expect(stdout).not.toContain("client-secret-abcdef1234567890");
+  });
+
+  test("masks the client ID showing only last 4 chars", async () => {
+    const { stdout } = await run(["config", "show"], validEnv);
+    expect(stdout).toContain("****7890");
+  });
+
+  test("masks the client secret showing only last 4 chars", async () => {
     const { stdout } = await run(["config", "show"], validEnv);
     expect(stdout).toContain("****7890");
   });
@@ -53,38 +64,68 @@ describe("misty config show", () => {
     expect(exitCode).toBe(0);
   });
 
-  test("--json output masks access token", async () => {
+  test("--json output masks client ID", async () => {
     const { stdout } = await run(["config", "show", "--json"], validEnv);
     const parsed = JSON.parse(stdout);
-    expect(parsed.data.accessToken).not.toBe("shpat_abcdef1234567890");
-    expect(parsed.data.accessToken).toContain("****");
+    expect(parsed.data.clientId).not.toBe("client-id-abcdef1234567890");
+    expect(parsed.data.clientId).toContain("****");
+  });
+
+  test("--json output masks client secret", async () => {
+    const { stdout } = await run(["config", "show", "--json"], validEnv);
+    const parsed = JSON.parse(stdout);
+    expect(parsed.data.clientSecret).not.toBe("client-secret-abcdef1234567890");
+    expect(parsed.data.clientSecret).toContain("****");
   });
 
   test("exits with error when MISTY_STORE is missing", async () => {
     const { stderr, exitCode } = await run(["config", "show"], {
-      MISTY_ACCESS_TOKEN: "shpat_abc123",
+      MISTY_STORE: "",
+      MISTY_CLIENT_ID: "id",
+      MISTY_CLIENT_SECRET: "secret",
     });
     expect(stderr).toContain("MISTY_STORE");
     expect(exitCode).toBe(1);
   });
 
-  test("exits with error when MISTY_ACCESS_TOKEN is missing", async () => {
+  test("exits with error when MISTY_CLIENT_ID is missing", async () => {
     const { stderr, exitCode } = await run(["config", "show"], {
       MISTY_STORE: "my-store.myshopify.com",
+      MISTY_CLIENT_ID: "",
+      MISTY_CLIENT_SECRET: "secret",
     });
-    expect(stderr).toContain("MISTY_ACCESS_TOKEN");
+    expect(stderr).toContain("MISTY_CLIENT_ID");
     expect(exitCode).toBe(1);
   });
 
-  test("exits with error naming both missing vars when both absent", async () => {
-    const { stderr, exitCode } = await run(["config", "show"], {});
+  test("exits with error when MISTY_CLIENT_SECRET is missing", async () => {
+    const { stderr, exitCode } = await run(["config", "show"], {
+      MISTY_STORE: "my-store.myshopify.com",
+      MISTY_CLIENT_ID: "id",
+      MISTY_CLIENT_SECRET: "",
+    });
+    expect(stderr).toContain("MISTY_CLIENT_SECRET");
+    expect(exitCode).toBe(1);
+  });
+
+  test("exits with error naming all missing vars when all absent", async () => {
+    const { stderr, exitCode } = await run(["config", "show"], {
+      MISTY_STORE: "",
+      MISTY_CLIENT_ID: "",
+      MISTY_CLIENT_SECRET: "",
+    });
     expect(stderr).toContain("MISTY_STORE");
-    expect(stderr).toContain("MISTY_ACCESS_TOKEN");
+    expect(stderr).toContain("MISTY_CLIENT_ID");
+    expect(stderr).toContain("MISTY_CLIENT_SECRET");
     expect(exitCode).toBe(1);
   });
 
   test("errors go to stderr, not stdout", async () => {
-    const { stdout, stderr } = await run(["config", "show"], {});
+    const { stdout, stderr } = await run(["config", "show"], {
+      MISTY_STORE: "",
+      MISTY_CLIENT_ID: "",
+      MISTY_CLIENT_SECRET: "",
+    });
     expect(stdout).toBe("");
     expect(stderr).not.toBe("");
   });

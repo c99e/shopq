@@ -68,6 +68,14 @@ beforeAll(() => {
   mockServer = Bun.serve({
     port: 0,
     fetch: async (req) => {
+      const url = new URL(req.url);
+      if (url.pathname === "/admin/oauth/access_token") {
+        return new Response(JSON.stringify({
+          access_token: "mock-token",
+          scope: "read_products,write_products",
+          expires_in: 86399,
+        }), { headers: { "Content-Type": "application/json" } });
+      }
       lastRequestBody = await req.json();
       const query = lastRequestBody.query as string;
 
@@ -121,7 +129,8 @@ function run(args: string[], env?: Record<string, string>) {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
     MISTY_STORE: `localhost:${mockPort}`,
-    MISTY_ACCESS_TOKEN: "shpat_test123",
+    MISTY_CLIENT_ID: "test-client-id",
+    MISTY_CLIENT_SECRET: "test-client-secret",
     MISTY_PROTOCOL: "http",
     ...env,
   };
@@ -226,7 +235,8 @@ describe("misty file list", () => {
   test("exits with error when credentials missing", async () => {
     const { stderr, exitCode } = await run(["file", "list"], {
       MISTY_STORE: "",
-      MISTY_ACCESS_TOKEN: "",
+      MISTY_CLIENT_ID: "",
+      MISTY_CLIENT_SECRET: "",
     });
     expect(stderr).toContain("MISTY_STORE");
     expect(exitCode).toBe(1);

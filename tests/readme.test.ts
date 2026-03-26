@@ -10,7 +10,7 @@ test("README describes what Mistea is", () => {
 test("README lists prerequisites", () => {
   expect(readme).toMatch(/bun/i);
   expect(readme).toMatch(/MISTY_STORE/);
-  expect(readme).toMatch(/MISTY_ACCESS_TOKEN/);
+  expect(readme).toMatch(/MISTY_CLIENT_ID/);
 });
 
 test("README has command reference for all resources", () => {

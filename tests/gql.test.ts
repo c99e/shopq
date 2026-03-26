@@ -28,7 +28,20 @@ async function run(
 
 // Helper to start a mock GraphQL server
 function startMockServer(handler: (req: Request) => Response | Promise<Response>) {
-  return Bun.serve({ port: 0, fetch: handler });
+  return Bun.serve({
+    port: 0,
+    fetch: (req) => {
+      const url = new URL(req.url);
+      if (url.pathname === "/admin/oauth/access_token") {
+        return new Response(JSON.stringify({
+          access_token: "mock-token",
+          scope: "read_products,write_products",
+          expires_in: 86399,
+        }), { headers: { "Content-Type": "application/json" } });
+      }
+      return handler(req);
+    },
+  });
 }
 
 describe("misty gql", () => {
@@ -37,7 +50,8 @@ describe("misty gql", () => {
   function envForServer() {
     return {
       MISTY_STORE: `localhost:${server!.port}`,
-      MISTY_ACCESS_TOKEN: "shpat_test",
+      MISTY_CLIENT_ID: "test-client-id",
+      MISTY_CLIENT_SECRET: "test-client-secret",
       MISTY_PROTOCOL: "http",
     };
   }
@@ -53,7 +67,7 @@ describe("misty gql", () => {
 
   test("exits 2 with error when no query is provided", async () => {
     const { stderr, exitCode } = await run(["gql"], {
-      env: { MISTY_STORE: "test.myshopify.com", MISTY_ACCESS_TOKEN: "shpat_x" },
+      env: { MISTY_STORE: "test.myshopify.com", MISTY_CLIENT_ID: "test-client-id", MISTY_CLIENT_SECRET: "test-client-secret" },
     });
     expect(exitCode).toBe(2);
     expect(stderr).toContain("No query provided");
@@ -72,7 +86,7 @@ describe("misty gql", () => {
   test("exits 2 when --file points to nonexistent file", async () => {
     const { stderr, exitCode } = await run(
       ["gql", "--file", "/tmp/nonexistent_query_abc123.graphql"],
-      { env: { MISTY_STORE: "test.myshopify.com", MISTY_ACCESS_TOKEN: "shpat_x" } },
+      { env: { MISTY_STORE: "test.myshopify.com", MISTY_CLIENT_ID: "test-client-id", MISTY_CLIENT_SECRET: "test-client-secret" } },
     );
     expect(exitCode).toBe(2);
     expect(stderr).toContain("nonexistent");
@@ -215,7 +229,7 @@ describe("misty gql", () => {
 
   test("exits 1 when credentials are missing", async () => {
     const { stderr, exitCode } = await run(["gql", "{ shop { name } }"], {
-      env: { MISTY_STORE: undefined as any, MISTY_ACCESS_TOKEN: undefined as any },
+      env: { MISTY_STORE: "", MISTY_CLIENT_ID: "", MISTY_CLIENT_SECRET: "" },
     });
     expect(exitCode).toBe(1);
     expect(stderr).toContain("MISTY_STORE");

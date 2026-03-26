@@ -2,7 +2,8 @@ export const API_VERSION = "2026-01";
 
 export interface ClientConfig {
   store: string;
-  accessToken: string;
+  clientId: string;
+  clientSecret: string;
   protocol?: "https" | "http";
   maxRetries?: number;
   timeoutMs?: number;
@@ -40,30 +41,88 @@ export class ConfigError extends Error {
   }
 }
 
-export function resolveConfig(storeFlag?: string): { store: string; accessToken: string } {
+export function resolveConfig(storeFlag?: string): { store: string; clientId: string; clientSecret: string } {
   const missing: string[] = [];
   const store = storeFlag || process.env.MISTY_STORE;
-  const accessToken = process.env.MISTY_ACCESS_TOKEN;
+  const clientId = process.env.MISTY_CLIENT_ID;
+  const clientSecret = process.env.MISTY_CLIENT_SECRET;
 
   if (!store) missing.push("MISTY_STORE");
-  if (!accessToken) missing.push("MISTY_ACCESS_TOKEN");
+  if (!clientId) missing.push("MISTY_CLIENT_ID");
+  if (!clientSecret) missing.push("MISTY_CLIENT_SECRET");
 
   if (missing.length > 0) {
     throw new ConfigError(missing);
   }
 
-  return { store: store!, accessToken: accessToken! };
+  return { store: store!, clientId: clientId!, clientSecret: clientSecret! };
 }
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export interface TokenResponse {
+  accessToken: string;
+  scope: string;
+  expiresIn: number;
+}
+
+export async function exchangeToken(opts: Pick<ClientConfig, "store" | "clientId" | "clientSecret" | "protocol">): Promise<TokenResponse> {
+  const protocol = opts.protocol ?? "https";
+  const url = `${protocol}://${opts.store}/admin/oauth/access_token`;
+
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_id: opts.clientId,
+    client_secret: opts.clientSecret,
+  });
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new HttpError(response.status, text);
+  }
+
+  const json = (await response.json()) as {
+    access_token: string;
+    scope: string;
+    expires_in: number;
+  };
+
+  return {
+    accessToken: json.access_token,
+    scope: json.scope,
+    expiresIn: json.expires_in,
+  };
+}
+
 export function createClient(config: ClientConfig): GraphQLClient {
-  const { store, accessToken, protocol = "https", maxRetries = 5, timeoutMs = 30000 } = config;
+  const { store, clientId, clientSecret, protocol = "https", maxRetries = 5, timeoutMs = 30000 } = config;
   const endpoint = `${protocol}://${store}/admin/api/${API_VERSION}/graphql.json`;
 
+  let cachedToken: string | null = null;
+  let tokenExpiresAt = 0;
+
+  async function getAccessToken(): Promise<string> {
+    if (cachedToken && Date.now() < tokenExpiresAt) {
+      return cachedToken;
+    }
+
+    const result = await exchangeToken({ store, clientId, clientSecret, protocol });
+    cachedToken = result.accessToken;
+    // Expire 60 seconds early to avoid edge cases
+    tokenExpiresAt = Date.now() + (result.expiresIn * 1000) - 60000;
+    return cachedToken;
+  }
+
   async function fetchRaw(query: string, variables?: Record<string, unknown>): Promise<RawGraphQLResponse> {
+    const accessToken = await getAccessToken();
     const body = JSON.stringify({ query, variables });
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {

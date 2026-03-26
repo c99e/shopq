@@ -1,6 +1,5 @@
 import { test, expect, describe, beforeEach, afterEach, mock } from "bun:test";
 
-// We'll test the helpers module once it exists
 import { getClient, handleCommandError, clampLimit } from "../src/helpers";
 import { ConfigError, GraphQLError } from "../src/graphql";
 
@@ -9,7 +8,8 @@ describe("getClient", () => {
 
   beforeEach(() => {
     process.env.MISTY_STORE = "test.myshopify.com";
-    process.env.MISTY_ACCESS_TOKEN = "shpat_test123";
+    process.env.MISTY_CLIENT_ID = "test-client-id";
+    process.env.MISTY_CLIENT_SECRET = "test-client-secret";
     delete process.env.MISTY_PROTOCOL;
   });
 
@@ -25,21 +25,20 @@ describe("getClient", () => {
   });
 
   test("uses store flag over env var", () => {
-    // Should not throw when store flag is provided even if env is missing
     delete process.env.MISTY_STORE;
     const client = getClient({ store: "flag-store.myshopify.com" });
     expect(client).toBeDefined();
   });
 
-  test("throws ConfigError when store and token are missing", () => {
+  test("throws ConfigError when store and credentials are missing", () => {
     delete process.env.MISTY_STORE;
-    delete process.env.MISTY_ACCESS_TOKEN;
+    delete process.env.MISTY_CLIENT_ID;
+    delete process.env.MISTY_CLIENT_SECRET;
     expect(() => getClient({})).toThrow(ConfigError);
   });
 
   test("uses http protocol when MISTY_PROTOCOL=http", () => {
     process.env.MISTY_PROTOCOL = "http";
-    // Should not throw — just verify it creates a client
     const client = getClient({});
     expect(client).toBeDefined();
   });
@@ -71,7 +70,7 @@ describe("handleCommandError", () => {
   });
 
   test("handles ConfigError with stderr output and exit code 1", () => {
-    const err = new ConfigError(["MISTY_STORE", "MISTY_ACCESS_TOKEN"]);
+    const err = new ConfigError(["MISTY_STORE", "MISTY_CLIENT_ID"]);
     handleCommandError(err);
     expect(stderrOutput).toContain("Error:");
     expect(stderrOutput).toContain("MISTY_STORE");

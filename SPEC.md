@@ -321,18 +321,22 @@ Single resource — no list, just get.
 
 ### Authentication
 
-- Reads from environment variables: `MISTY_STORE`, `MISTY_ACCESS_TOKEN`
+- Reads from environment variables: `MISTY_STORE`, `MISTY_CLIENT_ID`, `MISTY_CLIENT_SECRET`
 - `MISTY_STORE`: the `mystore.myshopify.com` domain (e.g., `my-shop.myshopify.com`)
-- `MISTY_ACCESS_TOKEN`: static Admin API access token from a Shopify custom app (starts with `shpat_`)
-- Token is passed via the `X-Shopify-Access-Token` header on every request — no OAuth flow, no token refresh, no caching needed
-- `--store` flag overrides `MISTY_STORE` for one-off commands against a different store (requires a token valid for that store)
+- `MISTY_CLIENT_ID`: Client ID from a Dev Dashboard app
+- `MISTY_CLIENT_SECRET`: Client Secret from a Dev Dashboard app
+- Uses the Client Credentials Grant to exchange credentials for a short-lived access token (24h TTL)
+- Token is cached in-memory and auto-refreshed when expired
+- The exchanged token is passed via the `X-Shopify-Access-Token` header on every request
+- `--store` flag overrides `MISTY_STORE` for one-off commands against a different store
 - If env vars are missing, print exactly which ones and exit
 
 **Setup steps (for documentation):**
-1. In Shopify Admin → Settings → Apps → Develop apps → Create an app
+1. Create an app in the [Dev Dashboard](https://shopify.dev/docs/apps/build/dev-dashboard/create-apps-using-dev-dashboard)
 2. Configure Admin API scopes (e.g., `read_products`, `write_products`, `read_content`, `write_content`)
-3. Install the app → copy the access token (shown once)
-4. Set `MISTY_STORE` and `MISTY_ACCESS_TOKEN` in `.env`
+3. Release an app version and install on your store
+4. Copy Client ID and Client Secret from app settings
+5. Set `MISTY_STORE`, `MISTY_CLIENT_ID`, and `MISTY_CLIENT_SECRET` in `.env`
 
 ### Pagination
 
@@ -353,7 +357,7 @@ Single resource — no list, just get.
 ### GraphQL Client
 
 - Centralized client used by all commands
-- Passes `MISTY_ACCESS_TOKEN` via `X-Shopify-Access-Token` header
+- Exchanges `MISTY_CLIENT_ID`/`MISTY_CLIENT_SECRET` for access token via Client Credentials Grant, then passes it via `X-Shopify-Access-Token` header
 - Endpoint: `https://{store}/admin/api/{version}/graphql.json`
 - API version pinned in one place (currently `2026-01`)
 - Parameterized queries only — no string interpolation of user input into query strings
@@ -371,7 +375,7 @@ Single resource — no list, just get.
 
 - Runtime: Bun
 - No external dependencies beyond Bun built-ins
-- Config: `.env` file with `MISTY_STORE`, `MISTY_ACCESS_TOKEN`
+- Config: `.env` file with `MISTY_STORE`, `MISTY_CLIENT_ID`, `MISTY_CLIENT_SECRET`
 - Entry point: `bin/misty.ts`
 - Installable as global command via `bun link`
 

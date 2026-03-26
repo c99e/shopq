@@ -16,13 +16,15 @@ async function handleConfigShow(parsed: ParsedArgs): Promise<void> {
     const data = {
       store: config.store,
       apiVersion: API_VERSION,
-      accessToken: maskToken(config.accessToken),
+      clientId: maskToken(config.clientId),
+      clientSecret: maskToken(config.clientSecret),
     };
 
     const columns = [
       { key: "store", header: "Store" },
       { key: "apiVersion", header: "API Version" },
-      { key: "accessToken", header: "Access Token" },
+      { key: "clientId", header: "Client ID" },
+      { key: "clientSecret", header: "Client Secret" },
     ];
 
     formatOutput(data, columns, {

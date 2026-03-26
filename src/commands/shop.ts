@@ -19,8 +19,8 @@ const SHOP_QUERY = `{
       zip
     }
     enabledPresentmentCurrencies
-    productsCount { count precision }
   }
+  productsCount { count precision }
 }`;
 
 interface ShopResponse {
@@ -39,8 +39,8 @@ interface ShopResponse {
       zip: string;
     } | null;
     enabledPresentmentCurrencies: string[];
-    productsCount: { count: number; precision: string };
   };
+  productsCount: { count: number; precision: string };
 }
 
 function formatAddress(addr: ShopResponse["shop"]["billingAddress"]): string {
@@ -56,6 +56,7 @@ async function handleShopGet(parsed: ParsedArgs): Promise<void> {
 
     const result = await client.query<ShopResponse>(SHOP_QUERY);
     const shop = result.shop;
+    const productsCount = result.productsCount;
 
     if (parsed.flags.json) {
       const data = {
@@ -67,7 +68,7 @@ async function handleShopGet(parsed: ParsedArgs): Promise<void> {
         taxesIncluded: shop.taxesIncluded,
         billingAddress: shop.billingAddress,
         enabledPresentmentCurrencies: shop.enabledPresentmentCurrencies,
-        productsCount: shop.productsCount,
+        productsCount,
       };
       formatOutput(data, [], { json: true, noColor: parsed.flags.noColor });
       return;
@@ -83,7 +84,7 @@ async function handleShopGet(parsed: ParsedArgs): Promise<void> {
       taxesIncluded: String(shop.taxesIncluded),
       billingAddress: formatAddress(shop.billingAddress),
       enabledPresentmentCurrencies: shop.enabledPresentmentCurrencies.join(", "),
-      productsCount: String(shop.productsCount.count),
+      productsCount: String(productsCount.count),
     };
 
     const columns = [
