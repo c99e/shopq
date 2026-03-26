@@ -207,8 +207,7 @@ async function handlePageList(parsed: ParsedArgs): Promise<void> {
   }
 }
 
-const PAGE_GET_QUERY = `query PageGetByHandle($handle: String!) {
-  pageByHandle(handle: $handle) {
+const PAGE_FIELDS = `
     id
     title
     handle
@@ -224,14 +223,49 @@ const PAGE_GET_QUERY = `query PageGetByHandle($handle: String!) {
           value
         }
       }
+    }`;
+
+const PAGE_GET_BY_ID_QUERY = `query PageGetById($id: ID!) {
+  page(id: $id) {
+    ${PAGE_FIELDS}
+  }
+}`;
+
+const PAGE_GET_BY_HANDLE_QUERY = `query PageGetByHandle($query: String!) {
+  pages(first: 1, query: $query) {
+    edges {
+      node {
+        ${PAGE_FIELDS}
+      }
     }
   }
 }`;
 
+interface PageFull {
+  id: string;
+  title: string;
+  handle: string;
+  isPublished: boolean;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  metafields: { edges: Array<{ node: MetafieldNode }> };
+}
+
+function resolvePageId(input: string): { type: "gid"; id: string } | { type: "handle"; handle: string } {
+  if (input.startsWith("gid://")) {
+    return { type: "gid", id: input };
+  }
+  if (/^\d+$/.test(input)) {
+    return { type: "gid", id: `gid://shopify/Page/${input}` };
+  }
+  return { type: "handle", handle: input };
+}
+
 async function handlePageGet(parsed: ParsedArgs): Promise<void> {
-  const handle = parsed.args.join(" ");
-  if (!handle) {
-    formatError("Usage: shopctl page get <handle>");
+  const idOrHandle = parsed.args.join(" ");
+  if (!idOrHandle) {
+    formatError("Usage: shopctl page get <id-or-handle>");
     process.exitCode = 2;
     return;
   }
@@ -239,26 +273,22 @@ async function handlePageGet(parsed: ParsedArgs): Promise<void> {
   try {
     const client = getClient(parsed.flags);
 
-    const result = await client.query<{
-      pageByHandle: {
-        id: string;
-        title: string;
-        handle: string;
-        isPublished: boolean;
-        body: string;
-        createdAt: string;
-        updatedAt: string;
-        metafields: { edges: Array<{ node: MetafieldNode }> };
-      } | null;
-    }>(PAGE_GET_QUERY, { handle });
+    const resolved = resolvePageId(idOrHandle);
+    let page: PageFull | null = null;
 
-    if (!result.pageByHandle) {
-      formatError(`Page "${handle}" not found`);
+    if (resolved.type === "gid") {
+      const result = await client.query<{ page: PageFull | null }>(PAGE_GET_BY_ID_QUERY, { id: resolved.id });
+      page = result.page;
+    } else {
+      const result = await client.query<{ pages: { edges: Array<{ node: PageFull }> } }>(PAGE_GET_BY_HANDLE_QUERY, { query: `handle:${resolved.handle}` });
+      page = result.pages.edges[0]?.node ?? null;
+    }
+
+    if (!page) {
+      formatError(`Page "${idOrHandle}" not found`);
       process.exitCode = 1;
       return;
     }
-
-    const page = result.pageByHandle;
     const seo = extractSeo(page.metafields);
 
     if (parsed.flags.json) {
@@ -312,8 +342,12 @@ register("page", "Page management", "create", {
   handler: handlePageCreate,
 });
 
-const PAGE_LOOKUP_QUERY = `query PageLookup($handle: String!) {
-  pageByHandle(handle: $handle) { id }
+const PAGE_LOOKUP_QUERY = `query PageLookup($query: String!) {
+  pages(first: 1, query: $query) {
+    edges {
+      node { id }
+    }
+  }
 }`;
 
 const PAGE_UPDATE_MUTATION = `mutation PageUpdate($id: ID!, $page: PageUpdateInput!) {
@@ -392,16 +426,17 @@ async function handlePageUpdate(parsed: ParsedArgs): Promise<void> {
 
     // Look up page by handle
     const lookup = await client.query<{
-      pageByHandle: { id: string } | null;
-    }>(PAGE_LOOKUP_QUERY, { handle });
+      pages: { edges: Array<{ node: { id: string } }> };
+    }>(PAGE_LOOKUP_QUERY, { query: `handle:${handle}` });
 
-    if (!lookup.pageByHandle) {
+    const foundPage = lookup.pages.edges[0]?.node;
+    if (!foundPage) {
       formatError(`Page "${handle}" not found`);
       process.exitCode = 1;
       return;
     }
 
-    const pageId = lookup.pageByHandle.id;
+    const pageId = foundPage.id;
 
     const result = await client.query<{
       pageUpdate: {
@@ -429,4 +464,105 @@ async function handlePageUpdate(parsed: ParsedArgs): Promise<void> {
 register("page", "Page management", "update", {
   description: "Update a static store page",
   handler: handlePageUpdate,
+});
+
+// --- page delete ---
+
+const PAGE_SUMMARY_BY_ID_QUERY = `query PageSummary($id: ID!) {
+  page(id: $id) {
+    id
+    title
+  }
+}`;
+
+const PAGE_SUMMARY_BY_HANDLE_QUERY = `query PageSummaryByHandle($query: String!) {
+  pages(first: 1, query: $query) {
+    edges {
+      node {
+        id
+        title
+      }
+    }
+  }
+}`;
+
+const PAGE_DELETE_MUTATION = `mutation PageDelete($id: ID!) {
+  pageDelete(id: $id) {
+    deletedPageId
+    userErrors { field message }
+  }
+}`;
+
+async function handlePageDelete(parsed: ParsedArgs): Promise<void> {
+  const idOrHandle = parsed.args.join(" ");
+  if (!idOrHandle) {
+    formatError("Usage: shopctl page delete <id-or-handle> [--yes]");
+    process.exitCode = 2;
+    return;
+  }
+
+  try {
+    const client = getClient(parsed.flags);
+
+    const resolved = resolvePageId(idOrHandle);
+    let pageGid: string;
+    let pageTitle: string;
+
+    if (resolved.type === "gid") {
+      const result = await client.query<{ page: { id: string; title: string } | null }>(PAGE_SUMMARY_BY_ID_QUERY, { id: resolved.id });
+      if (!result.page) {
+        formatError(`Page "${idOrHandle}" not found`);
+        process.exitCode = 1;
+        return;
+      }
+      pageGid = result.page.id;
+      pageTitle = result.page.title;
+    } else {
+      const result = await client.query<{ pages: { edges: Array<{ node: { id: string; title: string } }> } }>(PAGE_SUMMARY_BY_HANDLE_QUERY, { query: `handle:${resolved.handle}` });
+      const found = result.pages.edges[0]?.node;
+      if (!found) {
+        formatError(`Page "${idOrHandle}" not found`);
+        process.exitCode = 1;
+        return;
+      }
+      pageGid = found.id;
+      pageTitle = found.title;
+    }
+
+    // Dry run — no --yes
+    if (!parsed.flags.yes) {
+      const data = { id: pageGid, title: pageTitle };
+      if (parsed.flags.json) {
+        formatOutput(data, [], { json: true, noColor: parsed.flags.noColor });
+      } else {
+        process.stdout.write(`Would delete page: ${pageTitle} (${pageGid})\n`);
+      }
+      return;
+    }
+
+    // Execute delete
+    const result = await client.query<{
+      pageDelete: { deletedPageId: string | null; userErrors: UserError[] };
+    }>(PAGE_DELETE_MUTATION, { id: pageGid });
+
+    if (result.pageDelete.userErrors.length > 0) {
+      formatError(result.pageDelete.userErrors.map((e) => e.message).join("; "));
+      process.exitCode = 1;
+      return;
+    }
+
+    const data = { id: pageGid, title: pageTitle };
+    if (parsed.flags.json) {
+      formatOutput(data, [], { json: true, noColor: parsed.flags.noColor });
+    } else {
+      process.stdout.write(`Deleted page: ${pageTitle} (${pageGid})\n`);
+    }
+  } catch (err) {
+    handleCommandError(err);
+  }
+}
+
+register("page", "Page management", "delete", {
+  description: "Delete a page by ID or handle",
+  handler: handlePageDelete,
 });

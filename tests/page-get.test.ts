@@ -47,14 +47,24 @@ beforeAll(() => {
       lastRequestBody = await req.json();
       const query = lastRequestBody.query as string;
 
-      if (query.includes("PageGetByHandle") || query.includes("pageByHandle")) {
+      // page by ID
+      if (query.includes("page(id:") || query.includes("$id: ID!")) {
         if (mockBehavior === "not-found") {
-          return Response.json({ data: { pageByHandle: null } });
+          return Response.json({ data: { page: null } });
         }
         if (mockBehavior === "no-seo") {
-          return Response.json({ data: { pageByHandle: PAGE_NO_SEO } });
+          return Response.json({ data: { page: PAGE_NO_SEO } });
         }
-        return Response.json({ data: { pageByHandle: FULL_PAGE } });
+        return Response.json({ data: { page: FULL_PAGE } });
+      }
+
+      // page by handle via pages connection
+      if (query.includes("pages(") && lastRequestBody.variables?.query) {
+        if (mockBehavior === "not-found") {
+          return Response.json({ data: { pages: { edges: [] } } });
+        }
+        const pageData = mockBehavior === "no-seo" ? PAGE_NO_SEO : FULL_PAGE;
+        return Response.json({ data: { pages: { edges: [{ node: pageData }] } } });
       }
 
       return Response.json({ data: {} });
@@ -139,9 +149,23 @@ describe("shopctl page get — found", () => {
     expect(parsed.data.seo.description).toBe("Learn more about our company");
   });
 
-  test("sends handle variable in GraphQL query", async () => {
+  test("sends handle as query filter in GraphQL query", async () => {
     await run(["page", "get", "about-us"]);
-    expect(lastRequestBody.variables.handle).toBe("about-us");
+    expect(lastRequestBody.variables.query).toBe("handle:about-us");
+  });
+
+  test("lookup by GID uses page(id:) query", async () => {
+    const { stdout, exitCode } = await run(["page", "get", "gid://shopify/Page/101"]);
+    expect(lastRequestBody.variables.id).toBe("gid://shopify/Page/101");
+    expect(stdout).toContain("About Us");
+    expect(exitCode).toBe(0);
+  });
+
+  test("lookup by numeric ID uses page(id:) query", async () => {
+    const { stdout, exitCode } = await run(["page", "get", "101"]);
+    expect(lastRequestBody.variables.id).toBe("gid://shopify/Page/101");
+    expect(stdout).toContain("About Us");
+    expect(exitCode).toBe(0);
   });
 });
 

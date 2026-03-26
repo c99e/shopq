@@ -31,7 +31,6 @@ const MOCK_MENUS = [
       id: "gid://shopify/Menu/1",
       title: "Main Menu",
       handle: "main-menu",
-      itemsCount: { count: 3 },
       items: [MOCK_MENU_ITEM],
     },
   },
@@ -40,7 +39,6 @@ const MOCK_MENUS = [
       id: "gid://shopify/Menu/2",
       title: "Footer",
       handle: "footer",
-      itemsCount: { count: 0 },
       items: [],
     },
   },
@@ -154,7 +152,7 @@ describe("shopctl menu list", () => {
     expect(parsed.data[0].id).toBe("gid://shopify/Menu/1");
     expect(parsed.data[0].title).toBe("Main Menu");
     expect(parsed.data[0].handle).toBe("main-menu");
-    expect(parsed.data[0].itemCount).toBe(3);
+    expect(parsed.data[0].itemCount).toBe(1);
     expect(parsed.data[0].items).toBeArray();
     expect(parsed.data[0].items[0].title).toBe("Home");
     expect(parsed.data[0].items[0].items[0].title).toBe("About");

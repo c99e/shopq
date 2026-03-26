@@ -82,9 +82,9 @@ function run(args: string[], env?: Record<string, string>) {
 
 function mockPageLookupAndUpdate(pageId = "gid://shopify/Page/1001") {
   mockResponses.push((body) => {
-    if (body.query.includes("pageByHandle")) {
+    if (body.query.includes("pages(") && body.variables?.query) {
       return jsonRes({
-        pageByHandle: { id: pageId },
+        pages: { edges: [{ node: { id: pageId } }] },
       });
     }
     if (body.query.includes("pageUpdate")) {
@@ -218,8 +218,8 @@ describe("shopctl page update — body from file", () => {
 describe("shopctl page update — page not found", () => {
   test("exits with code 1 when page handle not found", async () => {
     mockResponses.push((body) => {
-      if (body.query.includes("pageByHandle")) {
-        return jsonRes({ pageByHandle: null });
+      if (body.query.includes("pages(") && body.variables?.query) {
+        return jsonRes({ pages: { edges: [] } });
       }
       return null;
     });
@@ -235,8 +235,8 @@ describe("shopctl page update — page not found", () => {
 describe("shopctl page update — GraphQL userErrors", () => {
   test("reports userErrors from the mutation", async () => {
     mockResponses.push((body) => {
-      if (body.query.includes("pageByHandle")) {
-        return jsonRes({ pageByHandle: { id: "gid://shopify/Page/1001" } });
+      if (body.query.includes("pages(") && body.variables?.query) {
+        return jsonRes({ pages: { edges: [{ node: { id: "gid://shopify/Page/1001" } }] } });
       }
       if (body.query.includes("pageUpdate")) {
         return jsonRes({

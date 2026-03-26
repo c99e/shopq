@@ -39,21 +39,23 @@ const MENU_BY_ID_QUERY = `query MenuGet($id: ID!) {
     id
     title
     handle
-    itemsCount { count }
     items {
       ${MENU_ITEMS_FRAGMENT}
     }
   }
 }`;
 
-const MENU_BY_HANDLE_QUERY = `query MenuGetByHandle($handle: String!) {
-  menuByHandle(handle: $handle) {
-    id
-    title
-    handle
-    itemsCount { count }
-    items {
-      ${MENU_ITEMS_FRAGMENT}
+const MENU_BY_HANDLE_QUERY = `query MenuGetByHandle($query: String!) {
+  menus(first: 1, query: $query) {
+    edges {
+      node {
+        id
+        title
+        handle
+        items {
+          ${MENU_ITEMS_FRAGMENT}
+        }
+      }
     }
   }
 }`;
@@ -69,7 +71,6 @@ interface Menu {
   id: string;
   title: string;
   handle: string;
-  itemsCount: { count: number };
   items: MenuItem[];
 }
 
@@ -115,8 +116,8 @@ async function handleMenuGet(parsed: ParsedArgs): Promise<void> {
       const result = await client.query<{ menu: Menu | null }>(MENU_BY_ID_QUERY, { id: resolved.id });
       menu = result.menu;
     } else {
-      const result = await client.query<{ menuByHandle: Menu | null }>(MENU_BY_HANDLE_QUERY, { handle: resolved.handle });
-      menu = result.menuByHandle;
+      const result = await client.query<{ menus: { edges: Array<{ node: Menu }> } }>(MENU_BY_HANDLE_QUERY, { query: `handle:${resolved.handle}` });
+      menu = result.menus.edges[0]?.node ?? null;
     }
 
     if (!menu) {
@@ -130,7 +131,7 @@ async function handleMenuGet(parsed: ParsedArgs): Promise<void> {
         id: menu.id,
         title: menu.title,
         handle: menu.handle,
-        itemsCount: menu.itemsCount.count,
+        itemsCount: menu.items.length,
         items: menu.items,
       };
       formatOutput(data, [], { json: true, noColor: parsed.flags.noColor });
@@ -143,7 +144,7 @@ async function handleMenuGet(parsed: ParsedArgs): Promise<void> {
     lines.push(`${label("ID")}: ${menu.id}`);
     lines.push(`${label("Title")}: ${menu.title}`);
     lines.push(`${label("Handle")}: ${menu.handle}`);
-    lines.push(`${label("Items Count")}: ${menu.itemsCount.count}`);
+    lines.push(`${label("Items Count")}: ${menu.items.length}`);
     lines.push("");
     lines.push(`${label("Items")}:`);
 
@@ -167,7 +168,6 @@ const MENUS_LIST_QUERY = `query MenuList {
         id
         title
         handle
-        itemsCount { count }
         items {
           ${MENU_ITEMS_FRAGMENT}
         }
@@ -191,7 +191,7 @@ async function handleMenuList(parsed: ParsedArgs): Promise<void> {
         id: m.id,
         title: m.title,
         handle: m.handle,
-        itemCount: m.itemsCount.count,
+        itemCount: m.items.length,
         items: m.items,
       }));
       formatOutput(data, [], { json: true, noColor: parsed.flags.noColor });
@@ -209,7 +209,7 @@ async function handleMenuList(parsed: ParsedArgs): Promise<void> {
       lines.push(`${label("ID")}: ${menu.id}`);
       lines.push(`${label("Title")}: ${menu.title}`);
       lines.push(`${label("Handle")}: ${menu.handle}`);
-      lines.push(`${label("Items Count")}: ${menu.itemsCount.count}`);
+      lines.push(`${label("Items Count")}: ${menu.items.length}`);
 
       if (menu.items.length > 0) {
         lines.push(`${label("Items")}:`);

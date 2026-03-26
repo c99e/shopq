@@ -21,11 +21,11 @@ const FILES_QUERY = `query FileList($first: Int!, $after: String, $query: String
         ... on GenericFile {
           id
           alt
-          mediaContentType
+          mimeType
           fileStatus
           url
           createdAt
-          originalSource { fileSize }
+          originalFileSize
         }
         ... on Video {
           id
@@ -48,13 +48,15 @@ const FILES_QUERY = `query FileList($first: Int!, $after: String, $query: String
 interface FileNode {
   id: string;
   alt: string | null;
-  mediaContentType: string;
+  mediaContentType?: string;
+  mimeType?: string;
   fileStatus: string;
   image?: { url: string } | null;
   url?: string;
   sources?: Array<{ url: string }>;
   createdAt: string;
   originalSource?: { fileSize: string | null };
+  originalFileSize?: number | null;
 }
 
 interface FilesResponse {
@@ -114,13 +116,15 @@ async function handleFileList(parsed: ParsedArgs): Promise<void> {
     const result = await client.query<FilesResponse>(FILES_QUERY, variables);
     const files = result.files.edges.map((e) => {
       const url = extractUrl(e.node);
+      const mediaType = e.node.mediaContentType ?? e.node.mimeType ?? "";
+      const fileSize = e.node.originalSource?.fileSize ?? (e.node.originalFileSize != null ? String(e.node.originalFileSize) : "");
       return {
         id: e.node.id,
         filename: extractFilename(url),
         url,
         alt: e.node.alt ?? "",
-        mediaType: e.node.mediaContentType,
-        fileSize: e.node.originalSource?.fileSize ?? "",
+        mediaType,
+        fileSize,
         createdAt: e.node.createdAt,
       };
     });

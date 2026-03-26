@@ -29,7 +29,6 @@ const MOCK_MENU = {
   id: "gid://shopify/Menu/123",
   title: "Main Menu",
   handle: "main-menu",
-  itemsCount: { count: 3 },
   items: [MOCK_MENU_ITEM],
 };
 
@@ -70,12 +69,12 @@ beforeAll(() => {
       return { data: { menu: null } };
     }
 
-    // menu by handle
-    if (query.includes("menuByHandle") || query.includes("$handle: String!")) {
-      if (variables.handle === "main-menu") {
-        return { data: { menuByHandle: MOCK_MENU } };
+    // menu by handle via menus connection
+    if (query.includes("menus(") && variables.query) {
+      if (variables.query === "handle:main-menu") {
+        return { data: { menus: { edges: [{ node: MOCK_MENU }] } } };
       }
-      return { data: { menuByHandle: null } };
+      return { data: { menus: { edges: [] } } };
     }
 
     return { data: {} };

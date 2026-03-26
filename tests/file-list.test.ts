@@ -12,7 +12,6 @@ const MOCK_FILES = [
       mediaContentType: "IMAGE",
       fileStatus: "READY",
       image: { url: "https://cdn.shopify.com/hero.jpg" },
-      fileSize: "204800",
       createdAt: "2024-01-15T10:00:00Z",
       originalSource: { fileSize: "204800" },
     },
@@ -21,13 +20,11 @@ const MOCK_FILES = [
     node: {
       id: "gid://shopify/GenericFile/2",
       alt: "User manual",
-      mediaContentType: "GENERIC_FILE",
+      mimeType: "application/pdf",
       fileStatus: "READY",
-      image: null,
       url: "https://cdn.shopify.com/manual.pdf",
-      fileSize: "1048576",
       createdAt: "2024-02-20T14:30:00Z",
-      originalSource: { fileSize: "1048576" },
+      originalFileSize: 1048576,
     },
   },
   {
@@ -36,9 +33,7 @@ const MOCK_FILES = [
       alt: "Product demo",
       mediaContentType: "VIDEO",
       fileStatus: "READY",
-      image: null,
       sources: [{ url: "https://cdn.shopify.com/demo.mp4" }],
-      fileSize: "5242880",
       createdAt: "2024-03-10T08:15:00Z",
       originalSource: { fileSize: "5242880" },
     },
@@ -86,8 +81,9 @@ beforeAll(() => {
         if (variables?.query && variables.query.includes("media_type:")) {
           const typeMatch = variables.query.match(/media_type:(\w+)/);
           const filterType = typeMatch?.[1];
+          const typeMap: Record<string, string> = { IMAGE: "IMAGE", VIDEO: "VIDEO", GENERIC_FILE: "application/pdf" };
           const filtered = MOCK_FILES.filter(
-            (f) => f.node.mediaContentType === filterType,
+            (f) => (f.node as any).mediaContentType === filterType || (filterType === "GENERIC_FILE" && (f.node as any).mimeType != null),
           );
           return new Response(
             JSON.stringify(makeFilesResponse(filtered, false, "cursor-filtered")),
@@ -223,7 +219,7 @@ describe("shopctl file list", () => {
     const { stdout } = await run(["file", "list", "--json", "--type", "GENERIC_FILE"]);
     const parsed = JSON.parse(stdout);
     expect(parsed.data.length).toBe(1);
-    expect(parsed.data[0].mediaType).toBe("GENERIC_FILE");
+    expect(parsed.data[0].mediaType).toBe("application/pdf");
   });
 
   test("invalid --type exits with code 2", async () => {
