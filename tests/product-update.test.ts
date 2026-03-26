@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll, beforeEach } from "bun:tes
 import { resolve } from "path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 const UPDATED_PRODUCT = {
   id: "gid://shopify/Product/1001",
@@ -87,10 +87,10 @@ function run(args: string[], env?: Record<string, string>) {
   const baseEnv = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
-    MISTY_STORE: `localhost:${mockPort}`,
-    MISTY_CLIENT_ID: "test-client-id",
-    MISTY_CLIENT_SECRET: "test-client-secret",
-    MISTY_PROTOCOL: "http",
+    SHOPIFY_STORE: `localhost:${mockPort}`,
+    SHOPIFY_CLIENT_ID: "test-client-id",
+    SHOPIFY_CLIENT_SECRET: "test-client-secret",
+    SHOPIFY_PROTOCOL: "http",
     ...env,
   };
   const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -105,7 +105,7 @@ function run(args: string[], env?: Record<string, string>) {
   ]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("misty product update — sends only provided fields", () => {
+describe("shopctl product update — sends only provided fields", () => {
   test("only --title sends title in mutation", async () => {
     const { exitCode } = await run(["product", "update", "1001", "--title", "New Name"]);
     expect(exitCode).toBe(0);
@@ -159,7 +159,7 @@ describe("misty product update — sends only provided fields", () => {
   });
 });
 
-describe("misty product update — ID resolution", () => {
+describe("shopctl product update — ID resolution", () => {
   test("numeric ID is converted to GID", async () => {
     await run(["product", "update", "1001", "--title", "X"]);
     expect(lastMutationVariables.input.id).toBe("gid://shopify/Product/1001");
@@ -189,7 +189,7 @@ describe("misty product update — ID resolution", () => {
   });
 });
 
-describe("misty product update — no update flags", () => {
+describe("shopctl product update — no update flags", () => {
   test("exits code 2 when no update flags provided", async () => {
     const { stderr, exitCode } = await run(["product", "update", "1001"]);
     expect(exitCode).toBe(2);
@@ -197,7 +197,7 @@ describe("misty product update — no update flags", () => {
   });
 });
 
-describe("misty product update — not found", () => {
+describe("shopctl product update — not found", () => {
   test("exits code 1 when title search finds nothing", async () => {
     searchBehavior = "none";
     const { stderr, exitCode } = await run(["product", "update", "Nonexistent", "--title", "X"]);
@@ -206,7 +206,7 @@ describe("misty product update — not found", () => {
   });
 });
 
-describe("misty product update — output", () => {
+describe("shopctl product update — output", () => {
   test("table output shows updated summary", async () => {
     const { stdout, exitCode } = await run(["product", "update", "1001", "--title", "New", "--no-color"]);
     expect(exitCode).toBe(0);
@@ -223,7 +223,7 @@ describe("misty product update — output", () => {
   });
 });
 
-describe("misty product update — missing id-or-title", () => {
+describe("shopctl product update — missing id-or-title", () => {
   test("exits with error when no id-or-title provided", async () => {
     const { stderr, exitCode } = await run(["product", "update"]);
     expect(exitCode).toBe(2);

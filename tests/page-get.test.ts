@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll, beforeEach } from "bun:tes
 import { resolve } from "path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 const FULL_PAGE = {
   id: "gid://shopify/Page/101",
@@ -71,10 +71,10 @@ function run(args: string[], env?: Record<string, string>) {
   const baseEnv = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
-    MISTY_STORE: `localhost:${mockPort}`,
-    MISTY_CLIENT_ID: "test-client-id",
-    MISTY_CLIENT_SECRET: "test-client-secret",
-    MISTY_PROTOCOL: "http",
+    SHOPIFY_STORE: `localhost:${mockPort}`,
+    SHOPIFY_CLIENT_ID: "test-client-id",
+    SHOPIFY_CLIENT_SECRET: "test-client-secret",
+    SHOPIFY_PROTOCOL: "http",
     ...env,
   };
   const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -89,7 +89,7 @@ function run(args: string[], env?: Record<string, string>) {
   ]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("misty page get — found", () => {
+describe("shopctl page get — found", () => {
   beforeEach(() => { mockBehavior = "found"; });
 
   test("table output shows page details", async () => {
@@ -145,7 +145,7 @@ describe("misty page get — found", () => {
   });
 });
 
-describe("misty page get — not found", () => {
+describe("shopctl page get — not found", () => {
   beforeEach(() => { mockBehavior = "not-found"; });
 
   test("exits with error when page not found", async () => {
@@ -155,7 +155,7 @@ describe("misty page get — not found", () => {
   });
 });
 
-describe("misty page get — no SEO", () => {
+describe("shopctl page get — no SEO", () => {
   beforeEach(() => { mockBehavior = "no-seo"; });
 
   test("--json returns null SEO fields when no metafields", async () => {
@@ -166,7 +166,7 @@ describe("misty page get — no SEO", () => {
   });
 });
 
-describe("misty page get — missing args", () => {
+describe("shopctl page get — missing args", () => {
   test("exits with error when no handle provided", async () => {
     const { stderr, exitCode } = await run(["page", "get"]);
     expect(stderr).toContain("Usage");

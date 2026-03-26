@@ -4,7 +4,7 @@ import { tmpdir } from "os";
 import { mkdtemp, writeFile, rm } from "fs/promises";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 let mockServer: Server;
 let mockPort: number;
@@ -13,7 +13,7 @@ let mockResponses: Array<(body: any) => Response | null> = [];
 let tmpDir: string;
 
 beforeAll(async () => {
-  tmpDir = await mkdtemp(join(tmpdir(), "misty-page-update-test-"));
+  tmpDir = await mkdtemp(join(tmpdir(), "shopctl-page-update-test-"));
 
   mockServer = Bun.serve({
     port: 0,
@@ -62,10 +62,10 @@ function run(args: string[], env?: Record<string, string>) {
   const baseEnv = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
-    MISTY_STORE: `localhost:${mockPort}`,
-    MISTY_CLIENT_ID: "test-client-id",
-    MISTY_CLIENT_SECRET: "test-client-secret",
-    MISTY_PROTOCOL: "http",
+    SHOPIFY_STORE: `localhost:${mockPort}`,
+    SHOPIFY_CLIENT_ID: "test-client-id",
+    SHOPIFY_CLIENT_SECRET: "test-client-secret",
+    SHOPIFY_PROTOCOL: "http",
     ...env,
   };
   const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -99,7 +99,7 @@ function mockPageLookupAndUpdate(pageId = "gid://shopify/Page/1001") {
   });
 }
 
-describe("misty page update — validation", () => {
+describe("shopctl page update — validation", () => {
   test("exits with code 2 when no update flags are provided", async () => {
     const { stderr, exitCode } = await run(["page", "update", "about-us"]);
     expect(exitCode).toBe(2);
@@ -122,7 +122,7 @@ describe("misty page update — validation", () => {
   });
 });
 
-describe("misty page update — update body only", () => {
+describe("shopctl page update — update body only", () => {
   test("sends only body in the mutation and returns updated fields", async () => {
     mockPageLookupAndUpdate();
 
@@ -143,7 +143,7 @@ describe("misty page update — update body only", () => {
   });
 });
 
-describe("misty page update — update SEO only", () => {
+describe("shopctl page update — update SEO only", () => {
   test("sends metafields for SEO fields and returns updated field names", async () => {
     mockPageLookupAndUpdate();
 
@@ -177,7 +177,7 @@ describe("misty page update — update SEO only", () => {
   });
 });
 
-describe("misty page update — update multiple fields", () => {
+describe("shopctl page update — update multiple fields", () => {
   test("sends title and body together, returns both in updated fields", async () => {
     mockPageLookupAndUpdate();
 
@@ -197,7 +197,7 @@ describe("misty page update — update multiple fields", () => {
   });
 });
 
-describe("misty page update — body from file", () => {
+describe("shopctl page update — body from file", () => {
   test("reads body from file path", async () => {
     const bodyFile = join(tmpDir, "update-body.html");
     await writeFile(bodyFile, "<h1>From File</h1>");
@@ -215,7 +215,7 @@ describe("misty page update — body from file", () => {
   });
 });
 
-describe("misty page update — page not found", () => {
+describe("shopctl page update — page not found", () => {
   test("exits with code 1 when page handle not found", async () => {
     mockResponses.push((body) => {
       if (body.query.includes("pageByHandle")) {
@@ -232,7 +232,7 @@ describe("misty page update — page not found", () => {
   });
 });
 
-describe("misty page update — GraphQL userErrors", () => {
+describe("shopctl page update — GraphQL userErrors", () => {
   test("reports userErrors from the mutation", async () => {
     mockResponses.push((body) => {
       if (body.query.includes("pageByHandle")) {
@@ -257,7 +257,7 @@ describe("misty page update — GraphQL userErrors", () => {
   });
 });
 
-describe("misty page update — table output", () => {
+describe("shopctl page update — table output", () => {
   test("prints updated fields without --json", async () => {
     mockPageLookupAndUpdate();
 
@@ -269,7 +269,7 @@ describe("misty page update — table output", () => {
   });
 });
 
-describe("misty page update — file-read error handling", () => {
+describe("shopctl page update — file-read error handling", () => {
   test("exits with error when --body-file does not exist", async () => {
     const { stderr, exitCode } = await run([
       "page", "update", "about-us",

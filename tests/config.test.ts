@@ -1,7 +1,7 @@
 import { describe, test, expect } from "bun:test";
 import { resolve } from "path";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 async function run(args: string[], env?: Record<string, string>) {
   const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -17,11 +17,11 @@ async function run(args: string[], env?: Record<string, string>) {
   return { stdout, stderr, exitCode };
 }
 
-describe("misty config show", () => {
+describe("shopctl config show", () => {
   const validEnv = {
-    MISTY_STORE: "my-store.myshopify.com",
-    MISTY_CLIENT_ID: "client-id-abcdef1234567890",
-    MISTY_CLIENT_SECRET: "client-secret-abcdef1234567890",
+    SHOPIFY_STORE: "my-store.myshopify.com",
+    SHOPIFY_CLIENT_ID: "client-id-abcdef1234567890",
+    SHOPIFY_CLIENT_SECRET: "client-secret-abcdef1234567890",
   };
 
   test("prints store domain in table output", async () => {
@@ -78,53 +78,53 @@ describe("misty config show", () => {
     expect(parsed.data.clientSecret).toContain("****");
   });
 
-  test("exits with error when MISTY_STORE is missing", async () => {
+  test("exits with error when SHOPIFY_STORE is missing", async () => {
     const { stderr, exitCode } = await run(["config", "show"], {
-      MISTY_STORE: "",
-      MISTY_CLIENT_ID: "id",
-      MISTY_CLIENT_SECRET: "secret",
+      SHOPIFY_STORE: "",
+      SHOPIFY_CLIENT_ID: "id",
+      SHOPIFY_CLIENT_SECRET: "secret",
     });
-    expect(stderr).toContain("MISTY_STORE");
+    expect(stderr).toContain("SHOPIFY_STORE");
     expect(exitCode).toBe(1);
   });
 
-  test("exits with error when MISTY_CLIENT_ID is missing", async () => {
+  test("exits with error when SHOPIFY_CLIENT_ID is missing", async () => {
     const { stderr, exitCode } = await run(["config", "show"], {
-      MISTY_STORE: "my-store.myshopify.com",
-      MISTY_CLIENT_ID: "",
-      MISTY_CLIENT_SECRET: "secret",
+      SHOPIFY_STORE: "my-store.myshopify.com",
+      SHOPIFY_CLIENT_ID: "",
+      SHOPIFY_CLIENT_SECRET: "secret",
     });
-    expect(stderr).toContain("MISTY_CLIENT_ID");
+    expect(stderr).toContain("SHOPIFY_CLIENT_ID");
     expect(exitCode).toBe(1);
   });
 
-  test("exits with error when MISTY_CLIENT_SECRET is missing", async () => {
+  test("exits with error when SHOPIFY_CLIENT_SECRET is missing", async () => {
     const { stderr, exitCode } = await run(["config", "show"], {
-      MISTY_STORE: "my-store.myshopify.com",
-      MISTY_CLIENT_ID: "id",
-      MISTY_CLIENT_SECRET: "",
+      SHOPIFY_STORE: "my-store.myshopify.com",
+      SHOPIFY_CLIENT_ID: "id",
+      SHOPIFY_CLIENT_SECRET: "",
     });
-    expect(stderr).toContain("MISTY_CLIENT_SECRET");
+    expect(stderr).toContain("SHOPIFY_CLIENT_SECRET");
     expect(exitCode).toBe(1);
   });
 
   test("exits with error naming all missing vars when all absent", async () => {
     const { stderr, exitCode } = await run(["config", "show"], {
-      MISTY_STORE: "",
-      MISTY_CLIENT_ID: "",
-      MISTY_CLIENT_SECRET: "",
+      SHOPIFY_STORE: "",
+      SHOPIFY_CLIENT_ID: "",
+      SHOPIFY_CLIENT_SECRET: "",
     });
-    expect(stderr).toContain("MISTY_STORE");
-    expect(stderr).toContain("MISTY_CLIENT_ID");
-    expect(stderr).toContain("MISTY_CLIENT_SECRET");
+    expect(stderr).toContain("SHOPIFY_STORE");
+    expect(stderr).toContain("SHOPIFY_CLIENT_ID");
+    expect(stderr).toContain("SHOPIFY_CLIENT_SECRET");
     expect(exitCode).toBe(1);
   });
 
   test("errors go to stderr, not stdout", async () => {
     const { stdout, stderr } = await run(["config", "show"], {
-      MISTY_STORE: "",
-      MISTY_CLIENT_ID: "",
-      MISTY_CLIENT_SECRET: "",
+      SHOPIFY_STORE: "",
+      SHOPIFY_CLIENT_ID: "",
+      SHOPIFY_CLIENT_SECRET: "",
     });
     expect(stdout).toBe("");
     expect(stderr).not.toBe("");

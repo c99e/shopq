@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { resolve } from "path";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 // Helper to run CLI as a subprocess
 async function run(
@@ -44,15 +44,15 @@ function startMockServer(handler: (req: Request) => Response | Promise<Response>
   });
 }
 
-describe("misty gql", () => {
+describe("shopctl gql", () => {
   let server: ReturnType<typeof Bun.serve> | null = null;
 
   function envForServer() {
     return {
-      MISTY_STORE: `localhost:${server!.port}`,
-      MISTY_CLIENT_ID: "test-client-id",
-      MISTY_CLIENT_SECRET: "test-client-secret",
-      MISTY_PROTOCOL: "http",
+      SHOPIFY_STORE: `localhost:${server!.port}`,
+      SHOPIFY_CLIENT_ID: "test-client-id",
+      SHOPIFY_CLIENT_SECRET: "test-client-secret",
+      SHOPIFY_PROTOCOL: "http",
     };
   }
 
@@ -67,7 +67,7 @@ describe("misty gql", () => {
 
   test("exits 2 with error when no query is provided", async () => {
     const { stderr, exitCode } = await run(["gql"], {
-      env: { MISTY_STORE: "test.myshopify.com", MISTY_CLIENT_ID: "test-client-id", MISTY_CLIENT_SECRET: "test-client-secret" },
+      env: { SHOPIFY_STORE: "test.myshopify.com", SHOPIFY_CLIENT_ID: "test-client-id", SHOPIFY_CLIENT_SECRET: "test-client-secret" },
     });
     expect(exitCode).toBe(2);
     expect(stderr).toContain("No query provided");
@@ -86,7 +86,7 @@ describe("misty gql", () => {
   test("exits 2 when --file points to nonexistent file", async () => {
     const { stderr, exitCode } = await run(
       ["gql", "--file", "/tmp/nonexistent_query_abc123.graphql"],
-      { env: { MISTY_STORE: "test.myshopify.com", MISTY_CLIENT_ID: "test-client-id", MISTY_CLIENT_SECRET: "test-client-secret" } },
+      { env: { SHOPIFY_STORE: "test.myshopify.com", SHOPIFY_CLIENT_ID: "test-client-id", SHOPIFY_CLIENT_SECRET: "test-client-secret" } },
     );
     expect(exitCode).toBe(2);
     expect(stderr).toContain("nonexistent");
@@ -158,7 +158,7 @@ describe("misty gql", () => {
   // --- File mode ---
 
   test("reads query from file with --file flag", async () => {
-    const tmpFile = "/tmp/misty_test_query.graphql";
+    const tmpFile = "/tmp/shopctl_test_query.graphql";
     await Bun.write(tmpFile, "{ shop { name } }");
 
     let receivedBody: any = null;
@@ -229,9 +229,9 @@ describe("misty gql", () => {
 
   test("exits 1 when credentials are missing", async () => {
     const { stderr, exitCode } = await run(["gql", "{ shop { name } }"], {
-      env: { MISTY_STORE: "", MISTY_CLIENT_ID: "", MISTY_CLIENT_SECRET: "" },
+      env: { SHOPIFY_STORE: "", SHOPIFY_CLIENT_ID: "", SHOPIFY_CLIENT_SECRET: "" },
     });
     expect(exitCode).toBe(1);
-    expect(stderr).toContain("MISTY_STORE");
+    expect(stderr).toContain("SHOPIFY_STORE");
   });
 });

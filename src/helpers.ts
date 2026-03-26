@@ -6,11 +6,11 @@ import { existsSync } from "fs";
 
 /**
  * Create a GraphQL client from parsed flags.
- * Centralizes resolveConfig + MISTY_PROTOCOL + createClient.
+ * Centralizes resolveConfig + SHOPIFY_PROTOCOL + createClient.
  */
 export function getClient(flags: { store?: string }): GraphQLClient {
   const config = resolveConfig(flags.store);
-  const protocol = process.env.MISTY_PROTOCOL === "http" ? "http" : "https";
+  const protocol = process.env.SHOPIFY_PROTOCOL === "http" ? "http" : "https";
   return createClient({ ...config, protocol });
 }
 

@@ -18,23 +18,23 @@ bun install
 2. Set your environment variables (Bun loads `.env` automatically):
 
 ```bash
-export MISTY_STORE="your-store.myshopify.com"
-export MISTY_CLIENT_ID="your-client-id"
-export MISTY_CLIENT_SECRET="your-client-secret"
+export SHOPCTL_STORE="your-store.myshopify.com"
+export SHOPCTL_CLIENT_ID="your-client-id"
+export SHOPCTL_CLIENT_SECRET="your-client-secret"
 ```
 
 Or create a `.env` file:
 
 ```
-MISTY_STORE=your-store.myshopify.com
-MISTY_CLIENT_ID=your-client-id
-MISTY_CLIENT_SECRET=your-client-secret
+SHOPCTL_STORE=your-store.myshopify.com
+SHOPCTL_CLIENT_ID=your-client-id
+SHOPCTL_CLIENT_SECRET=your-client-secret
 ```
 
 ## Usage
 
 ```
-misty <resource> <verb> [args] [flags]
+shopctl <resource> <verb> [args] [flags]
 ```
 
 ### Global flags
@@ -75,19 +75,19 @@ misty <resource> <verb> [args] [flags]
 ### List products
 
 ```bash
-misty product list --limit 10
+shopctl product list --limit 10
 ```
 
 ### Create a product with variants
 
 ```bash
-misty product create --title "T-Shirt" --variants variants.json
+shopctl product create --title "T-Shirt" --variants variants.json
 ```
 
 ### Get a page by handle
 
 ```bash
-misty page get --handle "about-us" --json
+shopctl page get --handle "about-us" --json
 ```
 
 ## Testing

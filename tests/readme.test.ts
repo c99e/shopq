@@ -9,8 +9,8 @@ test("README describes what Mistea is", () => {
 
 test("README lists prerequisites", () => {
   expect(readme).toMatch(/bun/i);
-  expect(readme).toMatch(/MISTY_STORE/);
-  expect(readme).toMatch(/MISTY_CLIENT_ID/);
+  expect(readme).toMatch(/SHOPIFY_STORE/);
+  expect(readme).toMatch(/SHOPIFY_CLIENT_ID/);
 });
 
 test("README has command reference for all resources", () => {
@@ -20,8 +20,8 @@ test("README has command reference for all resources", () => {
 });
 
 test("README includes usage examples", () => {
-  // At least 2 code blocks with misty commands
-  const examples = readme.match(/misty \w+ \w+/g) ?? [];
+  // At least 2 code blocks with shopctl commands
+  const examples = readme.match(/shopctl \w+ \w+/g) ?? [];
   expect(examples.length).toBeGreaterThanOrEqual(2);
 });
 

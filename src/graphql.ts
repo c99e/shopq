@@ -43,13 +43,13 @@ export class ConfigError extends Error {
 
 export function resolveConfig(storeFlag?: string): { store: string; clientId: string; clientSecret: string } {
   const missing: string[] = [];
-  const store = storeFlag || process.env.MISTY_STORE;
-  const clientId = process.env.MISTY_CLIENT_ID;
-  const clientSecret = process.env.MISTY_CLIENT_SECRET;
+  const store = storeFlag || process.env.SHOPIFY_STORE;
+  const clientId = process.env.SHOPIFY_CLIENT_ID;
+  const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
 
-  if (!store) missing.push("MISTY_STORE");
-  if (!clientId) missing.push("MISTY_CLIENT_ID");
-  if (!clientSecret) missing.push("MISTY_CLIENT_SECRET");
+  if (!store) missing.push("SHOPIFY_STORE");
+  if (!clientId) missing.push("SHOPIFY_CLIENT_ID");
+  if (!clientSecret) missing.push("SHOPIFY_CLIENT_SECRET");
 
   if (missing.length > 0) {
     throw new ConfigError(missing);

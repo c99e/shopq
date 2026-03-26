@@ -203,7 +203,7 @@ function truncate(str: string, max: number): string {
 async function handleProductGet(parsed: ParsedArgs): Promise<void> {
   const idOrTitle = parsed.args.join(" ");
   if (!idOrTitle) {
-    formatError("Usage: misty product get <id-or-title>");
+    formatError("Usage: shopctl product get <id-or-title>");
     process.exitCode = 2;
     return;
   }
@@ -496,7 +496,7 @@ const UPDATE_FLAGS = ["title", "description", "type", "vendor", "tags", "status"
 async function handleProductUpdate(parsed: ParsedArgs): Promise<void> {
   const idOrTitle = parsed.args.join(" ");
   if (!idOrTitle) {
-    formatError("Usage: misty product update <id-or-title> [--title ...] [--status ...] ...");
+    formatError("Usage: shopctl product update <id-or-title> [--title ...] [--status ...] ...");
     process.exitCode = 2;
     return;
   }
@@ -599,7 +599,7 @@ interface ProductSummaryResponse {
 async function handleProductDelete(parsed: ParsedArgs): Promise<void> {
   const idOrTitle = parsed.args.join(" ");
   if (!idOrTitle) {
-    formatError("Usage: misty product delete <id-or-title> [--yes]");
+    formatError("Usage: shopctl product delete <id-or-title> [--yes]");
     process.exitCode = 2;
     return;
   }

@@ -59,7 +59,7 @@ function truncate(str: string, max: number): string {
 async function handleCollectionGet(parsed: ParsedArgs): Promise<void> {
   const idOrHandle = parsed.args.join(" ");
   if (!idOrHandle) {
-    formatError("Usage: misty collection get <id-or-handle>");
+    formatError("Usage: shopctl collection get <id-or-handle>");
     process.exitCode = 2;
     return;
   }
