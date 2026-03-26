@@ -5,7 +5,7 @@ import { mkdtemp, writeFile, rm } from "fs/promises";
 import { join } from "path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 let mockServer: Server;
 let mockPort: number;
@@ -14,7 +14,7 @@ let mockResponses: Array<(body: any) => Response | null> = [];
 let tmpDir: string;
 
 beforeAll(async () => {
-  tmpDir = await mkdtemp(join(tmpdir(), "misty-test-"));
+  tmpDir = await mkdtemp(join(tmpdir(), "shopctl-test-"));
 
   mockServer = Bun.serve({
     port: 0,
@@ -69,10 +69,10 @@ function run(args: string[], env?: Record<string, string>) {
   const baseEnv = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
-    MISTY_STORE: `localhost:${mockPort}`,
-    MISTY_CLIENT_ID: "test-client-id",
-    MISTY_CLIENT_SECRET: "test-client-secret",
-    MISTY_PROTOCOL: "http",
+    SHOPIFY_STORE: `localhost:${mockPort}`,
+    SHOPIFY_CLIENT_ID: "test-client-id",
+    SHOPIFY_CLIENT_SECRET: "test-client-secret",
+    SHOPIFY_PROTOCOL: "http",
     ...env,
   };
   const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -87,7 +87,7 @@ function run(args: string[], env?: Record<string, string>) {
   ]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("misty product create — flag validation", () => {
+describe("shopctl product create — flag validation", () => {
   test("exits with code 2 when --title is missing", async () => {
     const { stderr, exitCode } = await run(["product", "create"]);
     expect(stderr).toContain("--title");
@@ -108,7 +108,7 @@ describe("misty product create — flag validation", () => {
   });
 });
 
-describe("misty product create — single-variant (no --variants)", () => {
+describe("shopctl product create — single-variant (no --variants)", () => {
   test("creates product with one mutation and returns product ID", async () => {
     mockResponses.push((body) => {
       if (body.query.includes("productCreate")) {
@@ -171,7 +171,7 @@ describe("misty product create — single-variant (no --variants)", () => {
   });
 });
 
-describe("misty product create — multi-variant", () => {
+describe("shopctl product create — multi-variant", () => {
   test("chains create product → options → bulk variants", async () => {
     const variantsFile = join(tmpDir, "variants.json");
     await writeFile(variantsFile, JSON.stringify([
@@ -235,7 +235,7 @@ describe("misty product create — multi-variant", () => {
   });
 });
 
-describe("misty product create — partial failure rollback", () => {
+describe("shopctl product create — partial failure rollback", () => {
   test("deletes product if variant creation fails", async () => {
     const variantsFile = join(tmpDir, "variants-fail.json");
     await writeFile(variantsFile, JSON.stringify([
@@ -343,7 +343,7 @@ describe("misty product create — partial failure rollback", () => {
   });
 });
 
-describe("misty product create — file-read error handling", () => {
+describe("shopctl product create — file-read error handling", () => {
   test("exits with error when --variants file does not exist", async () => {
     const { stderr, exitCode } = await run([
       "product", "create",

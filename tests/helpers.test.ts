@@ -7,10 +7,10 @@ describe("getClient", () => {
   const originalEnv = { ...process.env };
 
   beforeEach(() => {
-    process.env.MISTY_STORE = "test.myshopify.com";
-    process.env.MISTY_CLIENT_ID = "test-client-id";
-    process.env.MISTY_CLIENT_SECRET = "test-client-secret";
-    delete process.env.MISTY_PROTOCOL;
+    process.env.SHOPIFY_STORE = "test.myshopify.com";
+    process.env.SHOPIFY_CLIENT_ID = "test-client-id";
+    process.env.SHOPIFY_CLIENT_SECRET = "test-client-secret";
+    delete process.env.SHOPIFY_PROTOCOL;
   });
 
   afterEach(() => {
@@ -25,26 +25,26 @@ describe("getClient", () => {
   });
 
   test("uses store flag over env var", () => {
-    delete process.env.MISTY_STORE;
+    delete process.env.SHOPIFY_STORE;
     const client = getClient({ store: "flag-store.myshopify.com" });
     expect(client).toBeDefined();
   });
 
   test("throws ConfigError when store and credentials are missing", () => {
-    delete process.env.MISTY_STORE;
-    delete process.env.MISTY_CLIENT_ID;
-    delete process.env.MISTY_CLIENT_SECRET;
+    delete process.env.SHOPIFY_STORE;
+    delete process.env.SHOPIFY_CLIENT_ID;
+    delete process.env.SHOPIFY_CLIENT_SECRET;
     expect(() => getClient({})).toThrow(ConfigError);
   });
 
-  test("uses http protocol when MISTY_PROTOCOL=http", () => {
-    process.env.MISTY_PROTOCOL = "http";
+  test("uses http protocol when SHOPIFY_PROTOCOL=http", () => {
+    process.env.SHOPIFY_PROTOCOL = "http";
     const client = getClient({});
     expect(client).toBeDefined();
   });
 
-  test("defaults to https when MISTY_PROTOCOL is something else", () => {
-    process.env.MISTY_PROTOCOL = "ftp";
+  test("defaults to https when SHOPIFY_PROTOCOL is something else", () => {
+    process.env.SHOPIFY_PROTOCOL = "ftp";
     const client = getClient({});
     expect(client).toBeDefined();
   });
@@ -70,10 +70,10 @@ describe("handleCommandError", () => {
   });
 
   test("handles ConfigError with stderr output and exit code 1", () => {
-    const err = new ConfigError(["MISTY_STORE", "MISTY_CLIENT_ID"]);
+    const err = new ConfigError(["SHOPIFY_STORE", "SHOPIFY_CLIENT_ID"]);
     handleCommandError(err);
     expect(stderrOutput).toContain("Error:");
-    expect(stderrOutput).toContain("MISTY_STORE");
+    expect(stderrOutput).toContain("SHOPIFY_STORE");
     expect(process.exitCode).toBe(1);
   });
 

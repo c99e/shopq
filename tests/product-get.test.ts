@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { resolve } from "path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 const FULL_PRODUCT = {
   id: "gid://shopify/Product/1001",
@@ -140,10 +140,10 @@ function run(args: string[], env?: Record<string, string>) {
   const baseEnv = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
-    MISTY_STORE: `localhost:${mockPort}`,
-    MISTY_CLIENT_ID: "test-client-id",
-    MISTY_CLIENT_SECRET: "test-client-secret",
-    MISTY_PROTOCOL: "http",
+    SHOPIFY_STORE: `localhost:${mockPort}`,
+    SHOPIFY_CLIENT_ID: "test-client-id",
+    SHOPIFY_CLIENT_SECRET: "test-client-secret",
+    SHOPIFY_PROTOCOL: "http",
     ...env,
   };
   const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -182,7 +182,7 @@ describe("ID resolution", () => {
   });
 });
 
-describe("misty product get — by ID", () => {
+describe("shopctl product get — by ID", () => {
   test("table output shows product details", async () => {
     mockBehavior = "single";
     const { stdout, exitCode } = await run(["product", "get", "1001", "--no-color"]);
@@ -246,7 +246,7 @@ describe("misty product get — by ID", () => {
   });
 });
 
-describe("misty product get — not found", () => {
+describe("shopctl product get — not found", () => {
   test("exits with error when product not found by ID", async () => {
     mockBehavior = "none";
     const { stderr, exitCode } = await run(["product", "get", "9999"]);
@@ -262,7 +262,7 @@ describe("misty product get — not found", () => {
   });
 });
 
-describe("misty product get — disambiguation", () => {
+describe("shopctl product get — disambiguation", () => {
   test("multiple title matches prints candidate list and exits 1", async () => {
     mockBehavior = "multiple";
     const { stdout, exitCode } = await run(["product", "get", "Alpha"]);
@@ -274,7 +274,7 @@ describe("misty product get — disambiguation", () => {
   });
 });
 
-describe("misty product get — missing args", () => {
+describe("shopctl product get — missing args", () => {
   test("exits with error when no id-or-title provided", async () => {
     const { stderr, exitCode } = await run(["product", "get"]);
     expect(stderr).toContain("Usage");

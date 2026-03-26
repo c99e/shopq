@@ -4,7 +4,7 @@ import { tmpdir } from "os";
 import { mkdtemp, writeFile, rm } from "fs/promises";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 let mockServer: Server;
 let mockPort: number;
@@ -13,7 +13,7 @@ let mockResponses: Array<(body: any) => Response | null> = [];
 let tmpDir: string;
 
 beforeAll(async () => {
-  tmpDir = await mkdtemp(join(tmpdir(), "misty-page-test-"));
+  tmpDir = await mkdtemp(join(tmpdir(), "shopctl-page-test-"));
 
   mockServer = Bun.serve({
     port: 0,
@@ -62,10 +62,10 @@ function run(args: string[], env?: Record<string, string>) {
   const baseEnv = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
-    MISTY_STORE: `localhost:${mockPort}`,
-    MISTY_CLIENT_ID: "test-client-id",
-    MISTY_CLIENT_SECRET: "test-client-secret",
-    MISTY_PROTOCOL: "http",
+    SHOPIFY_STORE: `localhost:${mockPort}`,
+    SHOPIFY_CLIENT_ID: "test-client-id",
+    SHOPIFY_CLIENT_SECRET: "test-client-secret",
+    SHOPIFY_PROTOCOL: "http",
     ...env,
   };
   const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -80,7 +80,7 @@ function run(args: string[], env?: Record<string, string>) {
   ]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("misty page create — flag validation", () => {
+describe("shopctl page create — flag validation", () => {
   test("exits with code 2 when --title is missing", async () => {
     const { stderr, exitCode } = await run(["page", "create"]);
     expect(stderr).toContain("--title");
@@ -97,7 +97,7 @@ describe("misty page create — flag validation", () => {
   });
 });
 
-describe("misty page create — inline body", () => {
+describe("shopctl page create — inline body", () => {
   test("creates page with inline body and returns handle and ID", async () => {
     mockResponses.push((body) => {
       if (body.query.includes("pageCreate")) {
@@ -127,7 +127,7 @@ describe("misty page create — inline body", () => {
   });
 });
 
-describe("misty page create — body from file", () => {
+describe("shopctl page create — body from file", () => {
   test("reads body from file path", async () => {
     const bodyFile = join(tmpDir, "page-body.html");
     await writeFile(bodyFile, "<h1>From File</h1>");
@@ -154,7 +154,7 @@ describe("misty page create — body from file", () => {
   });
 });
 
-describe("misty page create — published flag", () => {
+describe("shopctl page create — published flag", () => {
   test("defaults to unpublished", async () => {
     mockResponses.push((body) => {
       if (body.query.includes("pageCreate")) {
@@ -194,7 +194,7 @@ describe("misty page create — published flag", () => {
   });
 });
 
-describe("misty page create — SEO metafields", () => {
+describe("shopctl page create — SEO metafields", () => {
   test("sends metafield mutations for SEO fields", async () => {
     mockResponses.push((body) => {
       if (body.query.includes("pageCreate")) {
@@ -239,7 +239,7 @@ describe("misty page create — SEO metafields", () => {
   });
 });
 
-describe("misty page create — handle flag", () => {
+describe("shopctl page create — handle flag", () => {
   test("passes handle to mutation input", async () => {
     mockResponses.push((body) => {
       if (body.query.includes("pageCreate")) {
@@ -260,7 +260,7 @@ describe("misty page create — handle flag", () => {
   });
 });
 
-describe("misty page create — GraphQL errors", () => {
+describe("shopctl page create — GraphQL errors", () => {
   test("reports userErrors from the mutation", async () => {
     mockResponses.push((body) => {
       if (body.query.includes("pageCreate")) {
@@ -280,7 +280,7 @@ describe("misty page create — GraphQL errors", () => {
   });
 });
 
-describe("misty page create — file-read error handling", () => {
+describe("shopctl page create — file-read error handling", () => {
   test("exits with error when --body-file does not exist", async () => {
     const { stderr, exitCode } = await run([
       "page", "create",

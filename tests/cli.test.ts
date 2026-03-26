@@ -1,7 +1,7 @@
 import { describe, test, expect } from "bun:test";
 import { resolve } from "path";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 async function run(args: string[], env?: Record<string, string>) {
   const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -17,7 +17,7 @@ async function run(args: string[], env?: Record<string, string>) {
   return { stdout, stderr, exitCode };
 }
 
-describe("misty CLI", () => {
+describe("shopctl CLI", () => {
   test("--version prints version from package.json and exits 0", async () => {
     const { stdout, exitCode } = await run(["--version"]);
     expect(stdout.trim()).toBe("0.1.0");
@@ -32,7 +32,7 @@ describe("misty CLI", () => {
 
   test("--help prints top-level usage and exits 0", async () => {
     const { stdout, exitCode } = await run(["--help"]);
-    expect(stdout).toContain("misty <resource> <verb>");
+    expect(stdout).toContain("shopctl <resource> <verb>");
     expect(stdout).toContain("--json");
     expect(stdout).toContain("--help");
     expect(stdout).toContain("--version");
@@ -43,7 +43,7 @@ describe("misty CLI", () => {
 
   test("-h prints help", async () => {
     const { stdout, exitCode } = await run(["-h"]);
-    expect(stdout).toContain("misty <resource> <verb>");
+    expect(stdout).toContain("shopctl <resource> <verb>");
     expect(exitCode).toBe(0);
   });
 
@@ -73,7 +73,7 @@ describe("misty CLI", () => {
 
   test("no arguments prints help and exits 0", async () => {
     const { stdout, exitCode } = await run([]);
-    expect(stdout).toContain("misty <resource> <verb>");
+    expect(stdout).toContain("shopctl <resource> <verb>");
     expect(exitCode).toBe(0);
   });
 

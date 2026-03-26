@@ -7,65 +7,65 @@ describe("resolveConfig", () => {
   const originalEnv = { ...process.env };
 
   beforeEach(() => {
-    delete process.env.MISTY_STORE;
-    delete process.env.MISTY_CLIENT_ID;
-    delete process.env.MISTY_CLIENT_SECRET;
+    delete process.env.SHOPIFY_STORE;
+    delete process.env.SHOPIFY_CLIENT_ID;
+    delete process.env.SHOPIFY_CLIENT_SECRET;
   });
 
   afterEach(() => {
-    process.env.MISTY_STORE = originalEnv.MISTY_STORE;
-    process.env.MISTY_CLIENT_ID = originalEnv.MISTY_CLIENT_ID;
-    process.env.MISTY_CLIENT_SECRET = originalEnv.MISTY_CLIENT_SECRET;
-    if (originalEnv.MISTY_STORE === undefined) delete process.env.MISTY_STORE;
-    if (originalEnv.MISTY_CLIENT_ID === undefined) delete process.env.MISTY_CLIENT_ID;
-    if (originalEnv.MISTY_CLIENT_SECRET === undefined) delete process.env.MISTY_CLIENT_SECRET;
+    process.env.SHOPIFY_STORE = originalEnv.SHOPIFY_STORE;
+    process.env.SHOPIFY_CLIENT_ID = originalEnv.SHOPIFY_CLIENT_ID;
+    process.env.SHOPIFY_CLIENT_SECRET = originalEnv.SHOPIFY_CLIENT_SECRET;
+    if (originalEnv.SHOPIFY_STORE === undefined) delete process.env.SHOPIFY_STORE;
+    if (originalEnv.SHOPIFY_CLIENT_ID === undefined) delete process.env.SHOPIFY_CLIENT_ID;
+    if (originalEnv.SHOPIFY_CLIENT_SECRET === undefined) delete process.env.SHOPIFY_CLIENT_SECRET;
   });
 
-  test("reads MISTY_STORE, MISTY_CLIENT_ID, and MISTY_CLIENT_SECRET from env", () => {
-    process.env.MISTY_STORE = "my-shop.myshopify.com";
-    process.env.MISTY_CLIENT_ID = "client-id-123";
-    process.env.MISTY_CLIENT_SECRET = "client-secret-456";
+  test("reads SHOPIFY_STORE, SHOPIFY_CLIENT_ID, and SHOPIFY_CLIENT_SECRET from env", () => {
+    process.env.SHOPIFY_STORE = "my-shop.myshopify.com";
+    process.env.SHOPIFY_CLIENT_ID = "client-id-123";
+    process.env.SHOPIFY_CLIENT_SECRET = "client-secret-456";
     const config = resolveConfig();
     expect(config.store).toBe("my-shop.myshopify.com");
     expect(config.clientId).toBe("client-id-123");
     expect(config.clientSecret).toBe("client-secret-456");
   });
 
-  test("--store flag overrides MISTY_STORE", () => {
-    process.env.MISTY_STORE = "original.myshopify.com";
-    process.env.MISTY_CLIENT_ID = "id";
-    process.env.MISTY_CLIENT_SECRET = "secret";
+  test("--store flag overrides SHOPIFY_STORE", () => {
+    process.env.SHOPIFY_STORE = "original.myshopify.com";
+    process.env.SHOPIFY_CLIENT_ID = "id";
+    process.env.SHOPIFY_CLIENT_SECRET = "secret";
     const config = resolveConfig("override.myshopify.com");
     expect(config.store).toBe("override.myshopify.com");
   });
 
-  test("throws with missing MISTY_STORE", () => {
-    process.env.MISTY_CLIENT_ID = "id";
-    process.env.MISTY_CLIENT_SECRET = "secret";
-    expect(() => resolveConfig()).toThrow("MISTY_STORE");
+  test("throws with missing SHOPIFY_STORE", () => {
+    process.env.SHOPIFY_CLIENT_ID = "id";
+    process.env.SHOPIFY_CLIENT_SECRET = "secret";
+    expect(() => resolveConfig()).toThrow("SHOPIFY_STORE");
   });
 
-  test("throws with missing MISTY_CLIENT_ID", () => {
-    process.env.MISTY_STORE = "my-shop.myshopify.com";
-    process.env.MISTY_CLIENT_SECRET = "secret";
-    expect(() => resolveConfig()).toThrow("MISTY_CLIENT_ID");
+  test("throws with missing SHOPIFY_CLIENT_ID", () => {
+    process.env.SHOPIFY_STORE = "my-shop.myshopify.com";
+    process.env.SHOPIFY_CLIENT_SECRET = "secret";
+    expect(() => resolveConfig()).toThrow("SHOPIFY_CLIENT_ID");
   });
 
-  test("throws with missing MISTY_CLIENT_SECRET", () => {
-    process.env.MISTY_STORE = "my-shop.myshopify.com";
-    process.env.MISTY_CLIENT_ID = "id";
-    expect(() => resolveConfig()).toThrow("MISTY_CLIENT_SECRET");
+  test("throws with missing SHOPIFY_CLIENT_SECRET", () => {
+    process.env.SHOPIFY_STORE = "my-shop.myshopify.com";
+    process.env.SHOPIFY_CLIENT_ID = "id";
+    expect(() => resolveConfig()).toThrow("SHOPIFY_CLIENT_SECRET");
   });
 
   test("throws listing all missing vars when all are missing", () => {
-    expect(() => resolveConfig()).toThrow("MISTY_STORE");
-    expect(() => resolveConfig()).toThrow("MISTY_CLIENT_ID");
-    expect(() => resolveConfig()).toThrow("MISTY_CLIENT_SECRET");
+    expect(() => resolveConfig()).toThrow("SHOPIFY_STORE");
+    expect(() => resolveConfig()).toThrow("SHOPIFY_CLIENT_ID");
+    expect(() => resolveConfig()).toThrow("SHOPIFY_CLIENT_SECRET");
   });
 
-  test("--store flag satisfies missing MISTY_STORE", () => {
-    process.env.MISTY_CLIENT_ID = "id";
-    process.env.MISTY_CLIENT_SECRET = "secret";
+  test("--store flag satisfies missing SHOPIFY_STORE", () => {
+    process.env.SHOPIFY_CLIENT_ID = "id";
+    process.env.SHOPIFY_CLIENT_SECRET = "secret";
     const config = resolveConfig("flag-store.myshopify.com");
     expect(config.store).toBe("flag-store.myshopify.com");
   });

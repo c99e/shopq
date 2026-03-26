@@ -231,7 +231,7 @@ const PAGE_GET_QUERY = `query PageGetByHandle($handle: String!) {
 async function handlePageGet(parsed: ParsedArgs): Promise<void> {
   const handle = parsed.args.join(" ");
   if (!handle) {
-    formatError("Usage: misty page get <handle>");
+    formatError("Usage: shopctl page get <handle>");
     process.exitCode = 2;
     return;
   }
@@ -328,7 +328,7 @@ async function handlePageUpdate(parsed: ParsedArgs): Promise<void> {
   const handle = parsed.args.join(" ");
 
   if (!handle) {
-    formatError("Usage: misty page update <handle>");
+    formatError("Usage: shopctl page update <handle>");
     process.exitCode = 2;
     return;
   }

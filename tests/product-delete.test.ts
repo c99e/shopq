@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll, beforeEach } from "bun:tes
 import { resolve } from "path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/misty.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
 
 let mockServer: Server;
 let mockPort: number;
@@ -120,10 +120,10 @@ function run(args: string[], env?: Record<string, string>) {
   const baseEnv = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
-    MISTY_STORE: `localhost:${mockPort}`,
-    MISTY_CLIENT_ID: "test-client-id",
-    MISTY_CLIENT_SECRET: "test-client-secret",
-    MISTY_PROTOCOL: "http",
+    SHOPIFY_STORE: `localhost:${mockPort}`,
+    SHOPIFY_CLIENT_ID: "test-client-id",
+    SHOPIFY_CLIENT_SECRET: "test-client-secret",
+    SHOPIFY_PROTOCOL: "http",
     ...env,
   };
   const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -138,7 +138,7 @@ function run(args: string[], env?: Record<string, string>) {
   ]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("misty product delete — dry run (no --yes)", () => {
+describe("shopctl product delete — dry run (no --yes)", () => {
   test("prints what would be deleted and exits 0", async () => {
     const { stdout, exitCode } = await run(["product", "delete", "5001"]);
     expect(exitCode).toBe(0);
@@ -158,7 +158,7 @@ describe("misty product delete — dry run (no --yes)", () => {
   });
 });
 
-describe("misty product delete — with --yes", () => {
+describe("shopctl product delete — with --yes", () => {
   test("deletes product and returns title and ID", async () => {
     const { stdout, exitCode } = await run(["product", "delete", "5001", "--yes"]);
     expect(exitCode).toBe(0);
@@ -177,7 +177,7 @@ describe("misty product delete — with --yes", () => {
   });
 });
 
-describe("misty product delete — ID resolution", () => {
+describe("shopctl product delete — ID resolution", () => {
   test("accepts numeric ID", async () => {
     const { exitCode } = await run(["product", "delete", "5001", "--yes"]);
     expect(exitCode).toBe(0);
@@ -198,7 +198,7 @@ describe("misty product delete — ID resolution", () => {
   });
 });
 
-describe("misty product delete — errors", () => {
+describe("shopctl product delete — errors", () => {
   test("product not found by title exits 1", async () => {
     searchBehavior = "none";
     const { stderr, exitCode } = await run(["product", "delete", "Nonexistent", "--yes"]);

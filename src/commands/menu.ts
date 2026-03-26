@@ -100,7 +100,7 @@ function flattenItems(items: MenuItem[], depth: number, rows: Array<{ indent: st
 async function handleMenuGet(parsed: ParsedArgs): Promise<void> {
   const idOrHandle = parsed.args.join(" ");
   if (!idOrHandle) {
-    formatError("Usage: misty menu get <id-or-handle>");
+    formatError("Usage: shopctl menu get <id-or-handle>");
     process.exitCode = 2;
     return;
   }
