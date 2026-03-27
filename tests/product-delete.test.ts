@@ -9,7 +9,7 @@ import {
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 let mockServer: Server;
 let mockPort: number;
@@ -178,7 +178,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl product delete — dry run (no --yes)", () => {
+describe("shopq product delete — dry run (no --yes)", () => {
 	test("prints what would be deleted and exits 0", async () => {
 		const { stdout, exitCode } = await run(["product", "delete", "5001"]);
 		expect(exitCode).toBe(0);
@@ -203,7 +203,7 @@ describe("shopctl product delete — dry run (no --yes)", () => {
 	});
 });
 
-describe("shopctl product delete — with --yes", () => {
+describe("shopq product delete — with --yes", () => {
 	test("deletes product and returns title and ID", async () => {
 		const { stdout, exitCode } = await run([
 			"product",
@@ -233,7 +233,7 @@ describe("shopctl product delete — with --yes", () => {
 	});
 });
 
-describe("shopctl product delete — ID resolution", () => {
+describe("shopq product delete — ID resolution", () => {
 	test("accepts numeric ID", async () => {
 		const { exitCode } = await run(["product", "delete", "5001", "--yes"]);
 		expect(exitCode).toBe(0);
@@ -264,7 +264,7 @@ describe("shopctl product delete — ID resolution", () => {
 	});
 });
 
-describe("shopctl product delete — errors", () => {
+describe("shopq product delete — errors", () => {
 	test("product not found by title exits 1", async () => {
 		searchBehavior = "none";
 		const { stderr, exitCode } = await run([

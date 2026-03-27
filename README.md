@@ -1,6 +1,6 @@
-# shopctl
+# shopq
 
-[![CI](https://github.com/c-99-e/shopify-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/c-99-e/shopify-cli/actions/workflows/ci.yml)
+[![CI](https://github.com/c-99-e/shopq/actions/workflows/ci.yml/badge.svg)](https://github.com/c-99-e/shopq/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Bun](https://img.shields.io/badge/Bun-%3E%3D1.3-black?logo=bun)](https://bun.sh)
 
@@ -18,8 +18,8 @@ Built with AI agents as the primary user — structured JSON output, predictable
 1. Clone the repo and install dependencies:
 
 ```bash
-git clone https://github.com/c-99-e/shopify-cli.git
-cd shopify-cli
+git clone https://github.com/c-99-e/shopq.git
+cd shopq
 bun install
 ```
 
@@ -46,7 +46,7 @@ bun link
 ## Usage
 
 ```
-shopctl <resource> <verb> [args] [flags]
+shopq <resource> <verb> [args] [flags]
 ```
 
 ### Global flags
@@ -65,13 +65,13 @@ Every resource command is built on Shopify's Admin GraphQL API. When you need so
 
 ```bash
 # Inline query
-shopctl gql "{ shop { name email } }"
+shopq gql "{ shop { name email } }"
 
 # From a file
-shopctl gql - < my-query.graphql
+shopq gql - < my-query.graphql
 
 # With variables
-shopctl gql "mutation($id: ID!) { productDelete(input: {id: \$id}) { deletedProductId } }" --variables '{"id": "gid://shopify/Product/123"}'
+shopq gql "mutation($id: ID!) { productDelete(input: {id: \$id}) { deletedProductId } }" --variables '{"id": "gid://shopify/Product/123"}'
 ```
 
 This is the escape hatch — anything the Shopify Admin API supports, `gql` can do.
@@ -125,19 +125,19 @@ This is the escape hatch — anything the Shopify Admin API supports, `gql` can 
 
 ```bash
 # List products
-shopctl product list --limit 10
+shopq product list --limit 10
 
 # Get a product as JSON
-shopctl product get "T-Shirt" --json
+shopq product get "T-Shirt" --json
 
 # Create a product with variants
-shopctl product create --title "T-Shirt" --variants variants.json
+shopq product create --title "T-Shirt" --variants variants.json
 
 # Get a page by handle
-shopctl page get --handle "about-us"
+shopq page get --handle "about-us"
 
 # List collections
-shopctl collection list --json
+shopq collection list --json
 ```
 
 ## Testing

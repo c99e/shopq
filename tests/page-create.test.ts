@@ -11,7 +11,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 let mockServer: Server;
 let mockPort: number;
@@ -20,7 +20,7 @@ let mockResponses: Array<(body: any) => Response | null> = [];
 let tmpDir: string;
 
 beforeAll(async () => {
-	tmpDir = await mkdtemp(join(tmpdir(), "shopctl-page-test-"));
+	tmpDir = await mkdtemp(join(tmpdir(), "shopq-page-test-"));
 
 	mockServer = Bun.serve({
 		port: 0,
@@ -90,7 +90,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl page create — flag validation", () => {
+describe("shopq page create — flag validation", () => {
 	test("exits with code 2 when --title is missing", async () => {
 		const { stderr, exitCode } = await run(["page", "create"]);
 		expect(stderr).toContain("--title");
@@ -114,7 +114,7 @@ describe("shopctl page create — flag validation", () => {
 	});
 });
 
-describe("shopctl page create — inline body", () => {
+describe("shopq page create — inline body", () => {
 	test("creates page with inline body and returns handle and ID", async () => {
 		mockResponses.push((body) => {
 			if (body.query.includes("pageCreate")) {
@@ -150,7 +150,7 @@ describe("shopctl page create — inline body", () => {
 	});
 });
 
-describe("shopctl page create — body from file", () => {
+describe("shopq page create — body from file", () => {
 	test("reads body from file path", async () => {
 		const bodyFile = join(tmpDir, "page-body.html");
 		await writeFile(bodyFile, "<h1>From File</h1>");
@@ -183,7 +183,7 @@ describe("shopctl page create — body from file", () => {
 	});
 });
 
-describe("shopctl page create — published flag", () => {
+describe("shopq page create — published flag", () => {
 	test("defaults to unpublished", async () => {
 		mockResponses.push((body) => {
 			if (body.query.includes("pageCreate")) {
@@ -223,7 +223,7 @@ describe("shopctl page create — published flag", () => {
 	});
 });
 
-describe("shopctl page create — SEO metafields", () => {
+describe("shopq page create — SEO metafields", () => {
 	test("sends metafield mutations for SEO fields", async () => {
 		mockResponses.push((body) => {
 			if (body.query.includes("pageCreate")) {
@@ -272,7 +272,7 @@ describe("shopctl page create — SEO metafields", () => {
 	});
 });
 
-describe("shopctl page create — handle flag", () => {
+describe("shopq page create — handle flag", () => {
 	test("passes handle to mutation input", async () => {
 		mockResponses.push((body) => {
 			if (body.query.includes("pageCreate")) {
@@ -300,7 +300,7 @@ describe("shopctl page create — handle flag", () => {
 	});
 });
 
-describe("shopctl page create — GraphQL errors", () => {
+describe("shopq page create — GraphQL errors", () => {
 	test("reports userErrors from the mutation", async () => {
 		mockResponses.push((body) => {
 			if (body.query.includes("pageCreate")) {
@@ -325,7 +325,7 @@ describe("shopctl page create — GraphQL errors", () => {
 	});
 });
 
-describe("shopctl page create — file-read error handling", () => {
+describe("shopq page create — file-read error handling", () => {
 	test("exits with error when --body-file does not exist", async () => {
 		const { stderr, exitCode } = await run([
 			"page",

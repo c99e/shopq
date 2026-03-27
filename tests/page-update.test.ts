@@ -11,7 +11,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 let mockServer: Server;
 let mockPort: number;
@@ -20,7 +20,7 @@ let mockResponses: Array<(body: any) => Response | null> = [];
 let tmpDir: string;
 
 beforeAll(async () => {
-	tmpDir = await mkdtemp(join(tmpdir(), "shopctl-page-update-test-"));
+	tmpDir = await mkdtemp(join(tmpdir(), "shopq-page-update-test-"));
 
 	mockServer = Bun.serve({
 		port: 0,
@@ -109,7 +109,7 @@ function mockPageLookupAndUpdate(pageId = "gid://shopify/Page/1001") {
 	});
 }
 
-describe("shopctl page update — validation", () => {
+describe("shopq page update — validation", () => {
 	test("exits with code 2 when no update flags are provided", async () => {
 		const { stderr, exitCode } = await run(["page", "update", "about-us"]);
 		expect(exitCode).toBe(2);
@@ -138,7 +138,7 @@ describe("shopctl page update — validation", () => {
 	});
 });
 
-describe("shopctl page update — update body only", () => {
+describe("shopq page update — update body only", () => {
 	test("sends only body in the mutation and returns updated fields", async () => {
 		mockPageLookupAndUpdate();
 
@@ -164,7 +164,7 @@ describe("shopctl page update — update body only", () => {
 	});
 });
 
-describe("shopctl page update — update SEO only", () => {
+describe("shopq page update — update SEO only", () => {
 	test("sends metafields for SEO fields and returns updated field names", async () => {
 		mockPageLookupAndUpdate();
 
@@ -205,7 +205,7 @@ describe("shopctl page update — update SEO only", () => {
 	});
 });
 
-describe("shopctl page update — update multiple fields", () => {
+describe("shopq page update — update multiple fields", () => {
 	test("sends title and body together, returns both in updated fields", async () => {
 		mockPageLookupAndUpdate();
 
@@ -232,7 +232,7 @@ describe("shopctl page update — update multiple fields", () => {
 	});
 });
 
-describe("shopctl page update — body from file", () => {
+describe("shopq page update — body from file", () => {
 	test("reads body from file path", async () => {
 		const bodyFile = join(tmpDir, "update-body.html");
 		await writeFile(bodyFile, "<h1>From File</h1>");
@@ -255,7 +255,7 @@ describe("shopctl page update — body from file", () => {
 	});
 });
 
-describe("shopctl page update — page not found", () => {
+describe("shopq page update — page not found", () => {
 	test("exits with code 1 when page handle not found", async () => {
 		mockResponses.push((body) => {
 			if (body.query.includes("pages(") && body.variables?.query) {
@@ -276,7 +276,7 @@ describe("shopctl page update — page not found", () => {
 	});
 });
 
-describe("shopctl page update — GraphQL userErrors", () => {
+describe("shopq page update — GraphQL userErrors", () => {
 	test("reports userErrors from the mutation", async () => {
 		mockResponses.push((body) => {
 			if (body.query.includes("pages(") && body.variables?.query) {
@@ -307,7 +307,7 @@ describe("shopctl page update — GraphQL userErrors", () => {
 	});
 });
 
-describe("shopctl page update — table output", () => {
+describe("shopq page update — table output", () => {
 	test("prints updated fields without --json", async () => {
 		mockPageLookupAndUpdate();
 
@@ -323,7 +323,7 @@ describe("shopctl page update — table output", () => {
 	});
 });
 
-describe("shopctl page update — file-read error handling", () => {
+describe("shopq page update — file-read error handling", () => {
 	test("exits with error when --body-file does not exist", async () => {
 		const { stderr, exitCode } = await run([
 			"page",

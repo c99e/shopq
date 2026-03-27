@@ -1,17 +1,17 @@
 {
-	"name": "shopctl",
+	"name": "shopq",
 	"version": "0.1.0",
 	"description": "A zero-dependency Shopify Admin CLI built on Bun",
 	"type": "module",
 	"license": "MIT",
 	"bin": {
-		"shopctl": "dist/shopctl.js"
+		"shopq": "dist/shopq.js"
 	},
 	"files": [
 		"dist"
 	],
 	"scripts": {
-		"build": "bun build bin/shopctl.ts --target=node --outfile dist/shopctl.js && chmod +x dist/shopctl.js",
+		"build": "bun build bin/shopq.ts --target=node --outfile dist/shopq.js && chmod +x dist/shopq.js",
 		"prepublishOnly": "bun run build",
 		"test": "bun test",
 		"check": "bunx --bun biome check --write .",
@@ -19,11 +19,11 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/c-99-e/shopify-cli.git"
+		"url": "git+https://github.com/c-99-e/shopq.git"
 	},
-	"homepage": "https://github.com/c-99-e/shopify-cli",
+	"homepage": "https://github.com/c-99-e/shopq",
 	"bugs": {
-		"url": "https://github.com/c-99-e/shopify-cli/issues"
+		"url": "https://github.com/c-99-e/shopq/issues"
 	},
 	"keywords": [
 		"shopify",

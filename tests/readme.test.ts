@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 
 const readme = await Bun.file("README.md").text();
 
-test("README describes what shopctl is", () => {
+test("README describes what shopq is", () => {
 	expect(readme).toMatch(/shopify/i);
 	expect(readme).toMatch(/cli/i);
 });
@@ -30,8 +30,8 @@ test("README has command reference for all resources", () => {
 });
 
 test("README includes usage examples", () => {
-	// At least 2 code blocks with shopctl commands
-	const examples = readme.match(/shopctl \w+ \w+/g) ?? [];
+	// At least 2 code blocks with shopq commands
+	const examples = readme.match(/shopq \w+ \w+/g) ?? [];
 	expect(examples.length).toBeGreaterThanOrEqual(2);
 });
 

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 const FULL_PRODUCT = {
 	id: "gid://shopify/Product/1001",
@@ -221,7 +221,7 @@ describe("ID resolution", () => {
 	});
 });
 
-describe("shopctl product get — by ID", () => {
+describe("shopq product get — by ID", () => {
 	test("table output shows product details", async () => {
 		mockBehavior = "single";
 		const { stdout, exitCode } = await run([
@@ -295,7 +295,7 @@ describe("shopctl product get — by ID", () => {
 	});
 });
 
-describe("shopctl product get — not found", () => {
+describe("shopq product get — not found", () => {
 	test("exits with error when product not found by ID", async () => {
 		mockBehavior = "none";
 		const { stderr, exitCode } = await run(["product", "get", "9999"]);
@@ -311,7 +311,7 @@ describe("shopctl product get — not found", () => {
 	});
 });
 
-describe("shopctl product get — disambiguation", () => {
+describe("shopq product get — disambiguation", () => {
 	test("multiple title matches prints candidate list and exits 1", async () => {
 		mockBehavior = "multiple";
 		const { stdout, exitCode } = await run(["product", "get", "Alpha"]);
@@ -323,7 +323,7 @@ describe("shopctl product get — disambiguation", () => {
 	});
 });
 
-describe("shopctl product get — missing args", () => {
+describe("shopq product get — missing args", () => {
 	test("exits with error when no id-or-title provided", async () => {
 		const { stderr, exitCode } = await run(["product", "get"]);
 		expect(stderr).toContain("Usage");

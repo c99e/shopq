@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 async function run(args: string[], env?: Record<string, string>) {
 	const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -17,7 +17,7 @@ async function run(args: string[], env?: Record<string, string>) {
 	return { stdout, stderr, exitCode };
 }
 
-describe("shopctl config show", () => {
+describe("shopq config show", () => {
 	const validEnv = {
 		SHOPIFY_STORE: "my-store.myshopify.com",
 		SHOPIFY_CLIENT_ID: "client-id-abcdef1234567890",

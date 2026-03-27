@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 const MOCK_COLLECTION = {
 	id: "gid://shopify/Collection/123456",
@@ -105,7 +105,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl collection get", () => {
+describe("shopq collection get", () => {
 	test("lookup by numeric ID returns collection", async () => {
 		const { stdout, exitCode } = await run(["collection", "get", "123456"]);
 		expect(stdout).toContain("Summer Sale");

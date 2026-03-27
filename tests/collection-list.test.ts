@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 const MOCK_COLLECTIONS = [
 	{
@@ -113,7 +113,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl collection list", () => {
+describe("shopq collection list", () => {
 	test("table output shows collection titles", async () => {
 		const { stdout, exitCode } = await run(["collection", "list"]);
 		expect(stdout).toContain("Summer Collection");
