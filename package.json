@@ -5,9 +5,14 @@
 	"type": "module",
 	"license": "MIT",
 	"bin": {
-		"shopctl": "bin/shopctl.ts"
+		"shopctl": "dist/shopctl.js"
 	},
+	"files": [
+		"dist"
+	],
 	"scripts": {
+		"build": "bun build bin/shopctl.ts --target=node --outfile dist/shopctl.js && chmod +x dist/shopctl.js",
+		"prepublishOnly": "bun run build",
 		"test": "bun test",
 		"check": "bunx --bun biome check --write .",
 		"ci:check": "bunx --bun biome check ."

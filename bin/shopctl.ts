@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
 import "../src/commands/config";
 import "../src/commands/gql";

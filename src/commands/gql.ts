@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from "node:fs";
 import { getClient, handleCommandError } from "../helpers";
 import { formatError } from "../output";
 import { register } from "../registry";
@@ -9,16 +10,17 @@ async function handleGql(parsed: ParsedArgs): Promise<void> {
 
 	if (parsed.flags.file) {
 		// --file mode
-		const file = Bun.file(parsed.flags.file);
-		if (!(await file.exists())) {
+		if (!existsSync(parsed.flags.file)) {
 			formatError(`File not found: ${parsed.flags.file}`);
 			process.exitCode = 2;
 			return;
 		}
-		query = await file.text();
+		query = readFileSync(parsed.flags.file, "utf-8");
 	} else if (parsed.args[0] === "-") {
 		// stdin mode
-		query = await new Response(Bun.stdin.stream()).text();
+		const chunks: Buffer[] = [];
+		for await (const chunk of process.stdin) chunks.push(chunk);
+		query = Buffer.concat(chunks).toString("utf-8");
 	} else if (parsed.args[0]) {
 		// inline query
 		query = parsed.args[0];

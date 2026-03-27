@@ -1,9 +1,10 @@
+import { readFileSync } from "node:fs";
 import { resourceHelp, topLevelHelp } from "./help";
 import { parseArgs } from "./parse";
 import { getResource } from "./registry";
 
 const pkgPath = new URL("../package.json", import.meta.url).pathname;
-const pkg = (await Bun.file(pkgPath).json()) as { version: string };
+const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as { version: string };
 
 export async function run(argv: string[]): Promise<void> {
 	const parsed = parseArgs(argv);
