@@ -1,6 +1,6 @@
 {
 	"name": "shopq",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "A zero-dependency Shopify Admin CLI built on Bun",
 	"type": "module",
 	"license": "MIT",
@@ -8,7 +8,8 @@
 		"shopq": "dist/shopq.js"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"skills"
 	],
 	"scripts": {
 		"build": "bun build bin/shopq.ts --target=node --outfile dist/shopq.js && chmod +x dist/shopq.js",
@@ -30,8 +31,14 @@
 		"cli",
 		"admin",
 		"graphql",
-		"bun"
+		"bun",
+		"pi-package"
 	],
+	"pi": {
+		"skills": [
+			"./skills"
+		]
+	},
 	"engines": {
 		"bun": ">=1.3.0"
 	},
