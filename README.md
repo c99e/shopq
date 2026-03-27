@@ -12,7 +12,7 @@ Built with AI agents as the primary user — structured JSON output, predictable
 ## Install
 
 ```bash
-npm install -g shopq
+bun install -g shopq
 ```
 
 ## Prerequisites
