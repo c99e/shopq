@@ -9,7 +9,7 @@ import {
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 let mockServer: Server;
 let mockPort: number;
@@ -126,7 +126,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl page delete — dry run (no --yes)", () => {
+describe("shopq page delete — dry run (no --yes)", () => {
 	test("prints what would be deleted and exits 0", async () => {
 		const { stdout, exitCode } = await run(["page", "delete", "9001"]);
 		expect(exitCode).toBe(0);
@@ -151,7 +151,7 @@ describe("shopctl page delete — dry run (no --yes)", () => {
 	});
 });
 
-describe("shopctl page delete — with --yes", () => {
+describe("shopq page delete — with --yes", () => {
 	test("deletes page and returns title and ID", async () => {
 		const { stdout, exitCode } = await run(["page", "delete", "9001", "--yes"]);
 		expect(exitCode).toBe(0);
@@ -176,7 +176,7 @@ describe("shopctl page delete — with --yes", () => {
 	});
 });
 
-describe("shopctl page delete — ID resolution", () => {
+describe("shopq page delete — ID resolution", () => {
 	test("accepts numeric ID", async () => {
 		const { exitCode } = await run(["page", "delete", "9001", "--yes"]);
 		expect(exitCode).toBe(0);
@@ -201,7 +201,7 @@ describe("shopctl page delete — ID resolution", () => {
 	});
 });
 
-describe("shopctl page delete — errors", () => {
+describe("shopq page delete — errors", () => {
 	test("page not found exits 1", async () => {
 		lookupBehavior = "not-found";
 		const { stderr, exitCode } = await run([

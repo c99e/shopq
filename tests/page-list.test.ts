@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 const MOCK_PAGES = [
 	{
@@ -129,7 +129,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl page list", () => {
+describe("shopq page list", () => {
 	test("table output shows page titles", async () => {
 		const { stdout, exitCode } = await run(["page", "list"]);
 		expect(stdout).toContain("About Us");

@@ -1,6 +1,7 @@
-# shopctl
+# shopq
 
-[![CI](https://github.com/c-99-e/shopify-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/c-99-e/shopify-cli/actions/workflows/ci.yml)
+[![CI](https://github.com/c-99-e/shopq/actions/workflows/ci.yml/badge.svg)](https://github.com/c-99-e/shopq/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/shopq)](https://www.npmjs.com/package/shopq)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Bun](https://img.shields.io/badge/Bun-%3E%3D1.3-black?logo=bun)](https://bun.sh)
 
@@ -8,26 +9,26 @@ A zero-dependency Shopify Admin CLI built on [Bun](https://bun.sh). Manage produ
 
 Built with AI agents as the primary user — structured JSON output, predictable exit codes, and no interactive prompts.
 
+## Install
+
+```bash
+bun install -g shopq
+```
+
 ## Prerequisites
 
-- [Bun](https://bun.sh) v1.3+
+- [Bun](https://bun.sh) v1.3+ (also works with Node.js v18+)
 - A Shopify store with a [Dev Dashboard app](https://shopify.dev/docs/apps/build/authentication-authorization/client-credentials) configured for Client Credentials
 
 ## Setup
 
-1. Clone the repo and install dependencies:
+Configure your store credentials:
 
 ```bash
-git clone https://github.com/c-99-e/shopify-cli.git
-cd shopify-cli
-bun install
+shopq config set --store your-store.myshopify.com --client-id your-client-id --client-secret your-client-secret
 ```
 
-2. Copy the example env file and fill in your credentials:
-
-```bash
-cp .env.example .env
-```
+Or set environment variables:
 
 ```
 SHOPIFY_STORE=your-store.myshopify.com
@@ -35,18 +36,19 @@ SHOPIFY_CLIENT_ID=your-client-id
 SHOPIFY_CLIENT_SECRET=your-client-secret
 ```
 
-Bun loads `.env` automatically — no extra setup needed.
-
-3. Link the CLI globally (optional):
+### Development
 
 ```bash
+git clone https://github.com/c-99-e/shopq.git
+cd shopq
+bun install
 bun link
 ```
 
 ## Usage
 
 ```
-shopctl <resource> <verb> [args] [flags]
+shopq <resource> <verb> [args] [flags]
 ```
 
 ### Global flags
@@ -65,13 +67,13 @@ Every resource command is built on Shopify's Admin GraphQL API. When you need so
 
 ```bash
 # Inline query
-shopctl gql "{ shop { name email } }"
+shopq gql "{ shop { name email } }"
 
 # From a file
-shopctl gql - < my-query.graphql
+shopq gql - < my-query.graphql
 
 # With variables
-shopctl gql "mutation($id: ID!) { productDelete(input: {id: \$id}) { deletedProductId } }" --variables '{"id": "gid://shopify/Product/123"}'
+shopq gql "mutation($id: ID!) { productDelete(input: {id: \$id}) { deletedProductId } }" --variables '{"id": "gid://shopify/Product/123"}'
 ```
 
 This is the escape hatch — anything the Shopify Admin API supports, `gql` can do.
@@ -125,19 +127,19 @@ This is the escape hatch — anything the Shopify Admin API supports, `gql` can 
 
 ```bash
 # List products
-shopctl product list --limit 10
+shopq product list --limit 10
 
 # Get a product as JSON
-shopctl product get "T-Shirt" --json
+shopq product get "T-Shirt" --json
 
 # Create a product with variants
-shopctl product create --title "T-Shirt" --variants variants.json
+shopq product create --title "T-Shirt" --variants variants.json
 
 # Get a page by handle
-shopctl page get --handle "about-us"
+shopq page get --handle "about-us"
 
 # List collections
-shopctl collection list --json
+shopq collection list --json
 ```
 
 ## Testing

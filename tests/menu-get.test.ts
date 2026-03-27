@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 const MOCK_MENU_ITEM = {
 	title: "Home",
@@ -111,7 +111,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl menu get", () => {
+describe("shopq menu get", () => {
 	test("lookup by numeric ID returns menu", async () => {
 		const { stdout, exitCode } = await run(["menu", "get", "123"]);
 		expect(stdout).toContain("Main Menu");

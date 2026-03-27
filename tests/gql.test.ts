@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 // Helper to run CLI as a subprocess
 async function run(
@@ -49,7 +49,7 @@ function startMockServer(
 	});
 }
 
-describe("shopctl gql", () => {
+describe("shopq gql", () => {
 	let server: ReturnType<typeof Bun.serve> | null = null;
 
 	function envForServer() {
@@ -179,7 +179,7 @@ describe("shopctl gql", () => {
 	// --- File mode ---
 
 	test("reads query from file with --file flag", async () => {
-		const tmpFile = "/tmp/shopctl_test_query.graphql";
+		const tmpFile = "/tmp/shopq_test_query.graphql";
 		await Bun.write(tmpFile, "{ shop { name } }");
 
 		let receivedBody: any = null;

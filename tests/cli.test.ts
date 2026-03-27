@@ -1,7 +1,11 @@
 import { describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
+const pkg = JSON.parse(
+	readFileSync(resolve(import.meta.dir, "../package.json"), "utf-8"),
+);
 
 async function run(args: string[], env?: Record<string, string>) {
 	const proc = Bun.spawn(["bun", BIN, ...args], {
@@ -17,22 +21,22 @@ async function run(args: string[], env?: Record<string, string>) {
 	return { stdout, stderr, exitCode };
 }
 
-describe("shopctl CLI", () => {
+describe("shopq CLI", () => {
 	test("--version prints version from package.json and exits 0", async () => {
 		const { stdout, exitCode } = await run(["--version"]);
-		expect(stdout.trim()).toBe("0.1.0");
+		expect(stdout.trim()).toBe(pkg.version);
 		expect(exitCode).toBe(0);
 	});
 
 	test("-v prints version", async () => {
 		const { stdout, exitCode } = await run(["-v"]);
-		expect(stdout.trim()).toBe("0.1.0");
+		expect(stdout.trim()).toBe(pkg.version);
 		expect(exitCode).toBe(0);
 	});
 
 	test("--help prints top-level usage and exits 0", async () => {
 		const { stdout, exitCode } = await run(["--help"]);
-		expect(stdout).toContain("shopctl <resource> <verb>");
+		expect(stdout).toContain("shopq <resource> <verb>");
 		expect(stdout).toContain("--json");
 		expect(stdout).toContain("--help");
 		expect(stdout).toContain("--version");
@@ -43,7 +47,7 @@ describe("shopctl CLI", () => {
 
 	test("-h prints help", async () => {
 		const { stdout, exitCode } = await run(["-h"]);
-		expect(stdout).toContain("shopctl <resource> <verb>");
+		expect(stdout).toContain("shopq <resource> <verb>");
 		expect(exitCode).toBe(0);
 	});
 
@@ -73,7 +77,7 @@ describe("shopctl CLI", () => {
 
 	test("no arguments prints help and exits 0", async () => {
 		const { stdout, exitCode } = await run([]);
-		expect(stdout).toContain("shopctl <resource> <verb>");
+		expect(stdout).toContain("shopq <resource> <verb>");
 		expect(exitCode).toBe(0);
 	});
 

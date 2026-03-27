@@ -2,7 +2,7 @@ import { getAllResources, getResource } from "./registry";
 
 export function topLevelHelp(): string {
 	const lines = [
-		"Usage: shopctl <resource> <verb> [args] [flags]",
+		"Usage: shopq <resource> <verb> [args] [flags]",
 		"",
 		"Global Flags:",
 		"  --json, -j       Output as JSON",
@@ -30,7 +30,7 @@ export function resourceHelp(resourceName: string): string | undefined {
 	if (!resource) return undefined;
 
 	const lines = [
-		`Usage: shopctl ${resourceName} <verb> [args] [flags]`,
+		`Usage: shopq ${resourceName} <verb> [args] [flags]`,
 		"",
 		`${resource.description}`,
 		"",

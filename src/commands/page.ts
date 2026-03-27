@@ -294,7 +294,7 @@ function resolvePageId(
 async function handlePageGet(parsed: ParsedArgs): Promise<void> {
 	const idOrHandle = parsed.args.join(" ");
 	if (!idOrHandle) {
-		formatError("Usage: shopctl page get <id-or-handle>");
+		formatError("Usage: shopq page get <id-or-handle>");
 		process.exitCode = 2;
 		return;
 	}
@@ -397,7 +397,7 @@ async function handlePageUpdate(parsed: ParsedArgs): Promise<void> {
 	const handle = parsed.args.join(" ");
 
 	if (!handle) {
-		formatError("Usage: shopctl page update <handle>");
+		formatError("Usage: shopq page update <handle>");
 		process.exitCode = 2;
 		return;
 	}
@@ -542,7 +542,7 @@ const PAGE_DELETE_MUTATION = `mutation PageDelete($id: ID!) {
 async function handlePageDelete(parsed: ParsedArgs): Promise<void> {
 	const idOrHandle = parsed.args.join(" ");
 	if (!idOrHandle) {
-		formatError("Usage: shopctl page delete <id-or-handle> [--yes]");
+		formatError("Usage: shopq page delete <id-or-handle> [--yes]");
 		process.exitCode = 2;
 		return;
 	}

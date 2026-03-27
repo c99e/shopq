@@ -11,7 +11,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 let mockServer: Server;
 let mockPort: number;
@@ -20,7 +20,7 @@ let mockResponses: Array<(body: any) => Response | null> = [];
 let tmpDir: string;
 
 beforeAll(async () => {
-	tmpDir = await mkdtemp(join(tmpdir(), "shopctl-test-"));
+	tmpDir = await mkdtemp(join(tmpdir(), "shopq-test-"));
 
 	mockServer = Bun.serve({
 		port: 0,
@@ -96,7 +96,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl product create — flag validation", () => {
+describe("shopq product create — flag validation", () => {
 	test("exits with code 2 when --title is missing", async () => {
 		const { stderr, exitCode } = await run(["product", "create"]);
 		expect(stderr).toContain("--title");
@@ -128,7 +128,7 @@ describe("shopctl product create — flag validation", () => {
 	});
 });
 
-describe("shopctl product create — single-variant (no --variants)", () => {
+describe("shopq product create — single-variant (no --variants)", () => {
 	test("creates product with one mutation and returns product ID", async () => {
 		mockResponses.push((body) => {
 			if (body.query.includes("productCreate")) {
@@ -203,7 +203,7 @@ describe("shopctl product create — single-variant (no --variants)", () => {
 	});
 });
 
-describe("shopctl product create — multi-variant", () => {
+describe("shopq product create — multi-variant", () => {
 	test("chains create product → options → bulk variants", async () => {
 		const variantsFile = join(tmpDir, "variants.json");
 		await writeFile(
@@ -280,7 +280,7 @@ describe("shopctl product create — multi-variant", () => {
 	});
 });
 
-describe("shopctl product create — partial failure rollback", () => {
+describe("shopq product create — partial failure rollback", () => {
 	test("deletes product if variant creation fails", async () => {
 		const variantsFile = join(tmpDir, "variants-fail.json");
 		await writeFile(
@@ -414,7 +414,7 @@ describe("shopctl product create — partial failure rollback", () => {
 	});
 });
 
-describe("shopctl product create — file-read error handling", () => {
+describe("shopq product create — file-read error handling", () => {
 	test("exits with error when --variants file does not exist", async () => {
 		const { stderr, exitCode } = await run([
 			"product",

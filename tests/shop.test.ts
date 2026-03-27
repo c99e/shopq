@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 const MOCK_SHOP_DATA = {
 	data: {
@@ -78,7 +78,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl shop get", () => {
+describe("shopq shop get", () => {
 	test("table output contains shop name", async () => {
 		const { stdout, exitCode } = await run(["shop", "get"]);
 		expect(stdout).toContain("Test Store");

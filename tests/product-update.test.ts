@@ -9,7 +9,7 @@ import {
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 const UPDATED_PRODUCT = {
 	id: "gid://shopify/Product/1001",
@@ -130,7 +130,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl product update — sends only provided fields", () => {
+describe("shopq product update — sends only provided fields", () => {
 	test("only --title sends title in mutation", async () => {
 		const { exitCode } = await run([
 			"product",
@@ -225,7 +225,7 @@ describe("shopctl product update — sends only provided fields", () => {
 	});
 });
 
-describe("shopctl product update — ID resolution", () => {
+describe("shopq product update — ID resolution", () => {
 	test("numeric ID is converted to GID", async () => {
 		await run(["product", "update", "1001", "--title", "X"]);
 		expect(lastMutationVariables.input.id).toBe("gid://shopify/Product/1001");
@@ -269,7 +269,7 @@ describe("shopctl product update — ID resolution", () => {
 	});
 });
 
-describe("shopctl product update — no update flags", () => {
+describe("shopq product update — no update flags", () => {
 	test("exits code 2 when no update flags provided", async () => {
 		const { stderr, exitCode } = await run(["product", "update", "1001"]);
 		expect(exitCode).toBe(2);
@@ -277,7 +277,7 @@ describe("shopctl product update — no update flags", () => {
 	});
 });
 
-describe("shopctl product update — not found", () => {
+describe("shopq product update — not found", () => {
 	test("exits code 1 when title search finds nothing", async () => {
 		searchBehavior = "none";
 		const { stderr, exitCode } = await run([
@@ -292,7 +292,7 @@ describe("shopctl product update — not found", () => {
 	});
 });
 
-describe("shopctl product update — output", () => {
+describe("shopq product update — output", () => {
 	test("table output shows updated summary", async () => {
 		const { stdout, exitCode } = await run([
 			"product",
@@ -323,7 +323,7 @@ describe("shopctl product update — output", () => {
 	});
 });
 
-describe("shopctl product update — missing id-or-title", () => {
+describe("shopq product update — missing id-or-title", () => {
 	test("exits with error when no id-or-title provided", async () => {
 		const { stderr, exitCode } = await run(["product", "update"]);
 		expect(exitCode).toBe(2);

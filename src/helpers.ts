@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 import type { GraphQLClient } from "./graphql";
 import {
@@ -53,7 +53,7 @@ export async function readFileText(path: string): Promise<string | null> {
 		return null;
 	}
 	try {
-		return await Bun.file(path).text();
+		return readFileSync(path, "utf-8");
 	} catch (_err) {
 		formatError(`Failed to read file: ${path}`);
 		process.exitCode = 1;

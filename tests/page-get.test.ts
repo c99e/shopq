@@ -9,7 +9,7 @@ import {
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 const FULL_PAGE = {
 	id: "gid://shopify/Page/101",
@@ -123,7 +123,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl page get — found", () => {
+describe("shopq page get — found", () => {
 	beforeEach(() => {
 		mockBehavior = "found";
 	});
@@ -209,7 +209,7 @@ describe("shopctl page get — found", () => {
 	});
 });
 
-describe("shopctl page get — not found", () => {
+describe("shopq page get — not found", () => {
 	beforeEach(() => {
 		mockBehavior = "not-found";
 	});
@@ -221,7 +221,7 @@ describe("shopctl page get — not found", () => {
 	});
 });
 
-describe("shopctl page get — no SEO", () => {
+describe("shopq page get — no SEO", () => {
 	beforeEach(() => {
 		mockBehavior = "no-seo";
 	});
@@ -234,7 +234,7 @@ describe("shopctl page get — no SEO", () => {
 	});
 });
 
-describe("shopctl page get — missing args", () => {
+describe("shopq page get — missing args", () => {
 	test("exits with error when no handle provided", async () => {
 		const { stderr, exitCode } = await run(["page", "get"]);
 		expect(stderr).toContain("Usage");

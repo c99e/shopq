@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 import type { Server } from "bun";
 
-const BIN = resolve(import.meta.dir, "../bin/shopctl.ts");
+const BIN = resolve(import.meta.dir, "../bin/shopq.ts");
 
 const MOCK_THEMES = [
 	{
@@ -102,7 +102,7 @@ function run(args: string[], env?: Record<string, string>) {
 	]).then(([stdout, stderr, exitCode]) => ({ stdout, stderr, exitCode }));
 }
 
-describe("shopctl theme list", () => {
+describe("shopq theme list", () => {
 	test("table output shows theme names and roles", async () => {
 		const { stdout, exitCode } = await run(["theme", "list"]);
 		expect(stdout).toContain("Dawn");
