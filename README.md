@@ -1,5 +1,9 @@
 # shopctl
 
+[![CI](https://github.com/c-99-e/shopify-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/c-99-e/shopify-cli/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.3-black?logo=bun)](https://bun.sh)
+
 A zero-dependency Shopify Admin CLI built on [Bun](https://bun.sh). Manage products, pages, collections, menus, files, themes, and more from your terminal.
 
 Built with AI agents as the primary user — structured JSON output, predictable exit codes, and no interactive prompts.
