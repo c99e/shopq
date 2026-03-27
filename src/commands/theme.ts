@@ -1,6 +1,6 @@
-import { register } from "../registry";
-import { formatOutput } from "../output";
 import { getClient, handleCommandError } from "../helpers";
+import { formatOutput } from "../output";
+import { register } from "../registry";
 import type { ParsedArgs } from "../types";
 
 const THEMES_LIST_QUERY = `query ThemeList {
@@ -18,64 +18,64 @@ const THEMES_LIST_QUERY = `query ThemeList {
 }`;
 
 interface Theme {
-  id: string;
-  name: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	name: string;
+	role: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 function extractNumericId(gid: string): string {
-  const match = gid.match(/(\d+)$/);
-  return match ? match[1] : gid;
+	const match = gid.match(/(\d+)$/);
+	return match ? match[1] : gid;
 }
 
 async function handleThemeList(parsed: ParsedArgs): Promise<void> {
-  try {
-    const client = getClient(parsed.flags);
+	try {
+		const client = getClient(parsed.flags);
 
-    const result = await client.query<{
-      themes: { edges: Array<{ node: Theme }> };
-    }>(THEMES_LIST_QUERY, {});
+		const result = await client.query<{
+			themes: { edges: Array<{ node: Theme }> };
+		}>(THEMES_LIST_QUERY, {});
 
-    const themes = result.themes.edges.map((e) => e.node);
+		const themes = result.themes.edges.map((e) => e.node);
 
-    if (parsed.flags.json) {
-      const data = themes.map((t) => ({
-        id: t.id,
-        numericId: extractNumericId(t.id),
-        name: t.name,
-        role: t.role,
-        createdAt: t.createdAt,
-        updatedAt: t.updatedAt,
-      }));
-      formatOutput(data, [], { json: true, noColor: parsed.flags.noColor });
-      return;
-    }
+		if (parsed.flags.json) {
+			const data = themes.map((t) => ({
+				id: t.id,
+				numericId: extractNumericId(t.id),
+				name: t.name,
+				role: t.role,
+				createdAt: t.createdAt,
+				updatedAt: t.updatedAt,
+			}));
+			formatOutput(data, [], { json: true, noColor: parsed.flags.noColor });
+			return;
+		}
 
-    // Table output
-    const label = (name: string) =>
-      parsed.flags.noColor ? name : `\x1b[1m${name}\x1b[0m`;
-    const lines: string[] = [];
+		// Table output
+		const label = (name: string) =>
+			parsed.flags.noColor ? name : `\x1b[1m${name}\x1b[0m`;
+		const lines: string[] = [];
 
-    for (let i = 0; i < themes.length; i++) {
-      const theme = themes[i]!;
-      if (i > 0) lines.push("");
-      lines.push(`${label("ID")}: ${theme.id}`);
-      lines.push(`${label("Numeric ID")}: ${extractNumericId(theme.id)}`);
-      lines.push(`${label("Name")}: ${theme.name}`);
-      lines.push(`${label("Role")}: ${theme.role}`);
-      lines.push(`${label("Created")}: ${theme.createdAt}`);
-      lines.push(`${label("Updated")}: ${theme.updatedAt}`);
-    }
+		for (let i = 0; i < themes.length; i++) {
+			const theme = themes[i]!;
+			if (i > 0) lines.push("");
+			lines.push(`${label("ID")}: ${theme.id}`);
+			lines.push(`${label("Numeric ID")}: ${extractNumericId(theme.id)}`);
+			lines.push(`${label("Name")}: ${theme.name}`);
+			lines.push(`${label("Role")}: ${theme.role}`);
+			lines.push(`${label("Created")}: ${theme.createdAt}`);
+			lines.push(`${label("Updated")}: ${theme.updatedAt}`);
+		}
 
-    process.stdout.write(lines.join("\n") + "\n");
-  } catch (err) {
-    handleCommandError(err);
-  }
+		process.stdout.write(`${lines.join("\n")}\n`);
+	} catch (err) {
+		handleCommandError(err);
+	}
 }
 
 register("theme", "Theme management", "list", {
-  description: "List all themes",
-  handler: handleThemeList,
+	description: "List all themes",
+	handler: handleThemeList,
 });
