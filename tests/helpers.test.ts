@@ -52,7 +52,7 @@ describe("getClient", () => {
 describe("handleCommandError", () => {
 	let stderrOutput: string;
 	const originalWrite = process.stderr.write;
-	const originalExitCode = process.exitCode;
+	const originalExitCode = process.exitCode ?? 0;
 
 	beforeEach(() => {
 		stderrOutput = "";
@@ -97,7 +97,7 @@ describe("handleCommandError", () => {
 describe("clampLimit", () => {
 	let stderrOutput: string;
 	const originalWrite = process.stderr.write;
-	const originalExitCode = process.exitCode;
+	const originalExitCode = process.exitCode ?? 0;
 
 	beforeEach(() => {
 		stderrOutput = "";

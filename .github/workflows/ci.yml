@@ -14,12 +14,4 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install
       - run: bun run ci:check
-      - name: Run tests
-        run: |
-          output=$(bun test 2>&1) || true
-          echo "$output"
-          if echo "$output" | grep -q " 0 fail"; then
-            exit 0
-          else
-            exit 1
-          fi
+      - run: bun test
