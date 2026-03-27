@@ -1,74 +1,74 @@
+import { resourceHelp, topLevelHelp } from "./help";
 import { parseArgs } from "./parse";
 import { getResource } from "./registry";
-import { topLevelHelp, resourceHelp } from "./help";
 
 const pkgPath = new URL("../package.json", import.meta.url).pathname;
-const pkg = await Bun.file(pkgPath).json() as { version: string };
+const pkg = (await Bun.file(pkgPath).json()) as { version: string };
 
 export async function run(argv: string[]): Promise<void> {
-  const parsed = parseArgs(argv);
+	const parsed = parseArgs(argv);
 
-  if (parsed.flags.version) {
-    console.log(pkg.version);
-    return;
-  }
+	if (parsed.flags.version) {
+		console.log(pkg.version);
+		return;
+	}
 
-  if (!parsed.resource || (parsed.flags.help && !parsed.resource)) {
-    console.log(topLevelHelp());
-    return;
-  }
+	if (!parsed.resource || (parsed.flags.help && !parsed.resource)) {
+		console.log(topLevelHelp());
+		return;
+	}
 
-  const resource = getResource(parsed.resource);
+	const resource = getResource(parsed.resource);
 
-  if (parsed.flags.help && parsed.resource) {
-    const help = resourceHelp(parsed.resource);
-    if (help) {
-      console.log(help);
-      return;
-    }
-    // Unknown resource even with --help
-    process.stderr.write(`Error: unknown resource "${parsed.resource}"\n`);
-    process.exitCode = 2;
-    return;
-  }
+	if (parsed.flags.help && parsed.resource) {
+		const help = resourceHelp(parsed.resource);
+		if (help) {
+			console.log(help);
+			return;
+		}
+		// Unknown resource even with --help
+		process.stderr.write(`Error: unknown resource "${parsed.resource}"\n`);
+		process.exitCode = 2;
+		return;
+	}
 
-  if (!resource) {
-    process.stderr.write(`Error: unknown resource "${parsed.resource}"\n`);
-    process.exitCode = 2;
-    return;
-  }
+	if (!resource) {
+		process.stderr.write(`Error: unknown resource "${parsed.resource}"\n`);
+		process.exitCode = 2;
+		return;
+	}
 
-  if (!parsed.verb) {
-    // Check for a default handler (e.g., `shopctl gql <query>`)
-    const defaultCommand = resource.verbs.get("_default");
-    if (defaultCommand) {
-      await defaultCommand.handler(parsed);
-      return;
-    }
-    const help = resourceHelp(parsed.resource);
-    if (help) console.log(help);
-    return;
-  }
+	if (!parsed.verb) {
+		// Check for a default handler (e.g., `shopctl gql <query>`)
+		const defaultCommand = resource.verbs.get("_default");
+		if (defaultCommand) {
+			await defaultCommand.handler(parsed);
+			return;
+		}
+		const help = resourceHelp(parsed.resource);
+		if (help) console.log(help);
+		return;
+	}
 
-  // Check for a default handler first — if the resource has _default,
-  // the "verb" is actually an argument (e.g., `shopctl gql "{ shop { name } }"`)
-  const defaultCommand = resource.verbs.get("_default");
-  if (defaultCommand) {
-    // Shift verb back into args
-    parsed.args = [parsed.verb, ...parsed.args];
-    parsed.verb = undefined;
-    await defaultCommand.handler(parsed);
-    return;
-  }
+	// Check for a default handler first — if the resource has _default,
+	// the "verb" is actually an argument (e.g., `shopctl gql "{ shop { name } }"`)
+	const defaultCommand = resource.verbs.get("_default");
+	if (defaultCommand) {
+		// Shift verb back into args
+		parsed.args = [parsed.verb, ...parsed.args];
+		parsed.verb = undefined;
+		await defaultCommand.handler(parsed);
+		return;
+	}
 
-  const command = resource.verbs.get(parsed.verb);
-  if (!command) {
-    process.stderr.write(
-      `Error: unknown verb "${parsed.verb}" for resource "${parsed.resource}"\n`,
-    );
-    process.exitCode = 2;
-    return;
-  }
+	const command = resource.verbs.get(parsed.verb);
+	if (!command) {
+		process.stderr.write(
+			`Error: unknown verb "${parsed.verb}" for resource "${parsed.resource}"\n`,
+		);
+		process.exitCode = 2;
+		return;
+	}
 
-  await command.handler(parsed);
+	await command.handler(parsed);
 }

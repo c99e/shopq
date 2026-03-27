@@ -1,37 +1,40 @@
 {
-  "name": "shopctl",
-  "version": "0.1.0",
-  "description": "A zero-dependency Shopify Admin CLI built on Bun",
-  "type": "module",
-  "license": "MIT",
-  "bin": {
-    "shopctl": "bin/shopctl.ts"
-  },
-  "scripts": {
-    "test": "bun test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/c-99-e/shopify-cli.git"
-  },
-  "homepage": "https://github.com/c-99-e/shopify-cli",
-  "bugs": {
-    "url": "https://github.com/c-99-e/shopify-cli/issues"
-  },
-  "keywords": [
-    "shopify",
-    "cli",
-    "admin",
-    "graphql",
-    "bun"
-  ],
-  "engines": {
-    "bun": ">=1.3.0"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+	"name": "shopctl",
+	"version": "0.1.0",
+	"description": "A zero-dependency Shopify Admin CLI built on Bun",
+	"type": "module",
+	"license": "MIT",
+	"bin": {
+		"shopctl": "bin/shopctl.ts"
+	},
+	"scripts": {
+		"test": "bun test",
+		"check": "bunx --bun biome check --write .",
+		"ci:check": "bunx --bun biome check ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/c-99-e/shopify-cli.git"
+	},
+	"homepage": "https://github.com/c-99-e/shopify-cli",
+	"bugs": {
+		"url": "https://github.com/c-99-e/shopify-cli/issues"
+	},
+	"keywords": [
+		"shopify",
+		"cli",
+		"admin",
+		"graphql",
+		"bun"
+	],
+	"engines": {
+		"bun": ">=1.3.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.9",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
 }
