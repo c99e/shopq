@@ -47,47 +47,11 @@ export class ConfigError extends Error {
 	constructor(public missing: string[]) {
 		super(
 			`Missing required environment variables: ${missing.join(", ")}\n` +
-				`Set them in ~/.config/shopq/.env, a local .env file, or as environment variables.`,
+				`Set them in a .env file or as environment variables.`,
 		);
 		this.name = "ConfigError";
 	}
 }
-
-/**
- * Load env vars from ~/.config/shopq/.env (XDG base dir convention),
- * then let CWD .env and actual env vars override.
- * This follows the pattern used by gh, vercel, railway, etc.
- */
-function loadConfigEnv(): void {
-	const xdgConfig =
-		process.env.XDG_CONFIG_HOME ||
-		`${process.env.HOME || require("os").homedir()}/.config`;
-	const configPath = `${xdgConfig}/shopq/.env`;
-
-	try {
-		const content = require("fs").readFileSync(configPath, "utf-8") as string;
-		for (const line of content.split("\n")) {
-			const trimmed = line.trim();
-			if (!trimmed || trimmed.startsWith("#")) continue;
-			const eqIdx = trimmed.indexOf("=");
-			if (eqIdx === -1) continue;
-			const key = trimmed.slice(0, eqIdx).trim();
-			const value = trimmed
-				.slice(eqIdx + 1)
-				.trim()
-				.replace(/^["']|["']$/g, "");
-			// Don't override existing env vars (CWD .env or real env take precedence)
-			if (!process.env[key]) {
-				process.env[key] = value;
-			}
-		}
-	} catch {
-		// Config file doesn't exist — that's fine
-	}
-}
-
-// Load on module init
-loadConfigEnv();
 
 export function resolveConfig(storeFlag?: string): {
 	store: string;
