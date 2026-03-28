@@ -17,7 +17,7 @@ bun install -g shopq
 
 ## Prerequisites
 
-- [Bun](https://bun.sh) v1.3+ (also works with Node.js v18+)
+- [Bun](https://bun.sh) v1.3+ (also works with Node.js v22+)
 - A Shopify store with a [Dev Dashboard app](https://shopify.dev/docs/apps/build/authentication-authorization/client-credentials) configured for Client Credentials
 
 ## Setup
@@ -42,7 +42,9 @@ SHOPIFY_CLIENT_SECRET=your-client-secret
 git clone https://github.com/c-99-e/shopq.git
 cd shopq
 bun install
-bun link
+
+# Run locally without affecting a global shopq install
+bun run bin/shopq.ts <command>
 ```
 
 ## Usage
