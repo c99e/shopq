@@ -8,5 +8,4 @@ dist/
 *.tgz
 .sauna/
 .pi/
-CLAUDE.md
 SPEC.md
