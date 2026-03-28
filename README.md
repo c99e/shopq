@@ -11,8 +11,18 @@ Built with AI agents as the primary user — structured JSON output, predictable
 
 ## Install
 
+### CLI
+
 ```bash
 bun install -g shopq
+```
+
+### Pi coding agent
+
+Install as a [pi package](https://shittycodingagent.ai/packages) to give your agent Shopify skills:
+
+```bash
+pi install npm:shopq
 ```
 
 ## Prerequisites
