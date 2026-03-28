@@ -1,6 +1,6 @@
 {
 	"name": "shopq",
-	"version": "0.3.9",
+	"version": "0.4.0",
 	"description": "A zero-dependency Shopify Admin CLI built on Bun",
 	"type": "module",
 	"license": "MIT",
@@ -9,6 +9,7 @@
 	},
 	"files": [
 		"dist",
+		"extensions",
 		"skills"
 	],
 	"scripts": {
@@ -35,6 +36,9 @@
 		"pi-package"
 	],
 	"pi": {
+		"extensions": [
+			"./extensions"
+		],
 		"skills": [
 			"./skills"
 		]
@@ -47,6 +51,12 @@
 		"@types/bun": "latest"
 	},
 	"peerDependencies": {
+		"@mariozechner/pi-coding-agent": "*",
 		"typescript": "^5.9.3"
+	},
+	"peerDependenciesMeta": {
+		"@mariozechner/pi-coding-agent": {
+			"optional": true
+		}
 	}
 }

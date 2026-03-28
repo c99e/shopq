@@ -9,11 +9,7 @@ A zero-dependency Shopify Admin CLI. Structured JSON output, predictable exit co
 
 ## Setup
 
-Install globally:
-
-```bash
-bun install -g shopq
-```
+If `shopq` is not found on PATH, it may not be installed globally. Let the user know they can install it with their package manager (e.g. `npm install -g shopq`, `bun install -g shopq`, etc.).
 
 Configure credentials (one of):
 
