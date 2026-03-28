@@ -18,23 +18,30 @@ bun install -g shopq
 ## Prerequisites
 
 - [Bun](https://bun.sh) v1.3+ (also works with Node.js v18+)
-- A Shopify store with a [Dev Dashboard app](https://shopify.dev/docs/apps/build/authentication-authorization/client-credentials) configured for Client Credentials
+- A Shopify store with a Dev Dashboard app (see setup below)
 
 ## Setup
 
-Configure your store credentials:
+### 1. Create a Shopify app
 
-```bash
-shopq config set --store your-store.myshopify.com --client-id your-client-id --client-secret your-client-secret
-```
+1. Go to the [Shopify Dev Dashboard](https://dev.shopify.com/) and create a new app
+2. Configure the API scopes your app needs and release a version
+3. Click **Install app** (top right of the app overview page) to install it on your store
+4. Go to your app's **Settings** page and copy the **Client ID** and **Secret**
 
-Or set environment variables:
+Your store URL is the `xxx.myshopify.com` domain shown in your Shopify admin sidebar.
+
+### 2. Configure credentials
+
+Create a `.env` file in your project directory:
 
 ```
 SHOPIFY_STORE=your-store.myshopify.com
 SHOPIFY_CLIENT_ID=your-client-id
 SHOPIFY_CLIENT_SECRET=your-client-secret
 ```
+
+Bun loads `.env` automatically — no extra setup needed. shopq handles the OAuth token exchange behind the scenes.
 
 ### Development
 
