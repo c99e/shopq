@@ -36,9 +36,6 @@
 		"pi-package"
 	],
 	"pi": {
-		"extensions": [
-			"./extensions"
-		],
 		"skills": [
 			"./skills"
 		]

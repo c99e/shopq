@@ -9,7 +9,11 @@ A zero-dependency Shopify Admin CLI. Structured JSON output, predictable exit co
 
 ## Setup
 
-shopq is available locally via pi — no global install needed.
+If `shopq` is not found on PATH, it may not be installed globally. Let the user know they can install it with:
+
+```bash
+bun install -g shopq
+```
 
 Configure credentials (one of):
 
