@@ -1,6 +1,6 @@
 {
 	"name": "shopq",
-	"version": "0.3.7",
+	"version": "0.3.8",
 	"description": "A zero-dependency Shopify Admin CLI built on Bun",
 	"type": "module",
 	"license": "MIT",
@@ -15,6 +15,7 @@
 		"build": "bun build bin/shopq.ts --target=node --outfile dist/shopq.js && chmod +x dist/shopq.js",
 		"prepublishOnly": "bun run build",
 		"test": "bun test",
+		"prepare": "lefthook install",
 		"check": "bunx --bun biome check --write .",
 		"ci:check": "bunx --bun biome check ."
 	},
@@ -44,7 +45,8 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.9",
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"lefthook": "^2.1.4"
 	},
 	"peerDependencies": {
 		"typescript": "^5.9.3"
