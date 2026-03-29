@@ -241,3 +241,17 @@ describe("shopq page get — missing args", () => {
 		expect(exitCode).toBe(2);
 	});
 });
+
+describe("shopq page get — --handle flag", () => {
+	test("--handle without positional arg produces helpful error", async () => {
+		mockBehavior = "found";
+		const { stderr, exitCode } = await run([
+			"page",
+			"get",
+			"--handle",
+			"about-us",
+		]);
+		expect(stderr).toContain("positional");
+		expect(exitCode).toBe(2);
+	});
+});

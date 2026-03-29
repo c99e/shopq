@@ -3,6 +3,7 @@ import {
 	getClient,
 	handleCommandError,
 	readFileText,
+	rejectHandleFlag,
 } from "../helpers";
 import { formatError, formatOutput } from "../output";
 import { register } from "../registry";
@@ -292,6 +293,7 @@ function resolvePageId(
 }
 
 async function handlePageGet(parsed: ParsedArgs): Promise<void> {
+	if (rejectHandleFlag(parsed, "shopq page get <id-or-handle>")) return;
 	const idOrHandle = parsed.args.join(" ");
 	if (!idOrHandle) {
 		formatError("Usage: shopq page get <id-or-handle>");

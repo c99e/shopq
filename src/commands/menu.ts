@@ -1,4 +1,4 @@
-import { getClient, handleCommandError } from "../helpers";
+import { getClient, handleCommandError, rejectHandleFlag } from "../helpers";
 import { formatError, formatOutput } from "../output";
 import { register } from "../registry";
 import type { ParsedArgs } from "../types";
@@ -105,6 +105,7 @@ function flattenItems(
 }
 
 async function handleMenuGet(parsed: ParsedArgs): Promise<void> {
+	if (rejectHandleFlag(parsed, "shopq menu get <id-or-handle>")) return;
 	const idOrHandle = parsed.args.join(" ");
 	if (!idOrHandle) {
 		formatError("Usage: shopq menu get <id-or-handle>");

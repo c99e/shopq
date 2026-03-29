@@ -45,6 +45,30 @@ const FULL_PRODUCT = {
 			},
 		],
 	},
+	category: {
+		id: "gid://shopify/TaxonomyCategory/1",
+		name: "Widgets",
+	},
+	metafields: {
+		edges: [
+			{
+				node: {
+					namespace: "custom",
+					key: "ingredients",
+					type: "single_line_text_field",
+					value: "Steel, Rubber",
+				},
+			},
+			{
+				node: {
+					namespace: "custom",
+					key: "brewing_guide",
+					type: "multi_line_text_field",
+					value: "N/A",
+				},
+			},
+		],
+	},
 };
 
 const PRODUCT_B = {
@@ -262,6 +286,22 @@ describe("shopq product get — by ID", () => {
 		expect(stdout).not.toContain("</p>");
 	});
 
+	test("table output shows category", async () => {
+		mockBehavior = "single";
+		const { stdout } = await run(["product", "get", "1001", "--no-color"]);
+		expect(stdout).toContain("Category");
+		expect(stdout).toContain("Widgets");
+	});
+
+	test("table output shows metafields", async () => {
+		mockBehavior = "single";
+		const { stdout } = await run(["product", "get", "1001", "--no-color"]);
+		expect(stdout).toContain("Metafields");
+		expect(stdout).toContain("custom.ingredients");
+		expect(stdout).toContain("Steel, Rubber");
+		expect(stdout).toContain("custom.brewing_guide");
+	});
+
 	test("--json returns full product in { data } envelope", async () => {
 		mockBehavior = "single";
 		const { stdout, exitCode } = await run([
@@ -284,6 +324,15 @@ describe("shopq product get — by ID", () => {
 		expect(parsed.data.variants[0].sku).toBe("AW-001");
 		expect(parsed.data.images).toBeArray();
 		expect(parsed.data.images[0].url).toContain("image1.jpg");
+		expect(parsed.data.category).toEqual({
+			id: "gid://shopify/TaxonomyCategory/1",
+			name: "Widgets",
+		});
+		expect(parsed.data.metafields).toBeArray();
+		expect(parsed.data.metafields.length).toBe(2);
+		expect(parsed.data.metafields[0].namespace).toBe("custom");
+		expect(parsed.data.metafields[0].key).toBe("ingredients");
+		expect(parsed.data.metafields[0].value).toBe("Steel, Rubber");
 		expect(exitCode).toBe(0);
 	});
 
@@ -327,6 +376,20 @@ describe("shopq product get — missing args", () => {
 	test("exits with error when no id-or-title provided", async () => {
 		const { stderr, exitCode } = await run(["product", "get"]);
 		expect(stderr).toContain("Usage");
+		expect(exitCode).toBe(2);
+	});
+});
+
+describe("shopq product get — --handle flag", () => {
+	test("--handle without positional arg produces helpful error", async () => {
+		mockBehavior = "single";
+		const { stderr, exitCode } = await run([
+			"product",
+			"get",
+			"--handle",
+			"some-product",
+		]);
+		expect(stderr).toContain("positional");
 		expect(exitCode).toBe(2);
 	});
 });

@@ -4,6 +4,7 @@ import {
 	getClient,
 	handleCommandError,
 	readFileJson,
+	rejectHandleFlag,
 } from "../helpers";
 import { formatError, formatOutput } from "../output";
 import { register } from "../registry";
@@ -20,6 +21,8 @@ const PRODUCTS_QUERY = `query ProductList($first: Int!, $after: String, $sortKey
         vendor
         variantsCount { count }
         totalInventory
+        category { id name }
+        featuredImage { url }
       }
     }
     pageInfo {
@@ -37,6 +40,8 @@ interface ProductNode {
 	vendor: string;
 	variantsCount: { count: number };
 	totalInventory: number;
+	category: { id: string; name: string } | null;
+	featuredImage: { url: string } | null;
 }
 
 interface ProductsResponse {
@@ -82,6 +87,8 @@ async function handleProductList(parsed: ParsedArgs): Promise<void> {
 			vendor: e.node.vendor,
 			variantsCount: e.node.variantsCount.count,
 			totalInventory: e.node.totalInventory,
+			category: e.node.category?.name ?? null,
+			hasImage: e.node.featuredImage !== null,
 		}));
 
 		const pageInfo = result.products.pageInfo;
@@ -103,9 +110,16 @@ async function handleProductList(parsed: ParsedArgs): Promise<void> {
 			{ key: "vendor", header: "Vendor" },
 			{ key: "variantsCount", header: "Variants" },
 			{ key: "totalInventory", header: "Inventory" },
+			{ key: "category", header: "Category" },
+			{ key: "hasImage", header: "Image" },
 		];
 
-		formatOutput(products, columns, {
+		const tableData = products.map((p) => ({
+			...p,
+			hasImage: p.hasImage ? "Yes" : "No",
+		}));
+
+		formatOutput(tableData, columns, {
 			json: false,
 			noColor: parsed.flags.noColor,
 			pageInfo,
@@ -124,6 +138,17 @@ const PRODUCT_GET_QUERY = `query ProductGet($id: ID!) {
     vendor
     tags
     descriptionHtml
+    category { id name }
+    metafields(first: 25) {
+      edges {
+        node {
+          namespace
+          key
+          type
+          value
+        }
+      }
+    }
     variants(first: 100) {
       edges {
         node {
@@ -167,6 +192,17 @@ interface ProductGetResponse {
 		vendor: string;
 		tags: string[];
 		descriptionHtml: string;
+		category: { id: string; name: string } | null;
+		metafields: {
+			edges: Array<{
+				node: {
+					namespace: string;
+					key: string;
+					type: string;
+					value: string;
+				};
+			}>;
+		};
 		variants: {
 			edges: Array<{
 				node: {
@@ -219,6 +255,7 @@ function truncate(str: string, max: number): string {
 }
 
 async function handleProductGet(parsed: ParsedArgs): Promise<void> {
+	if (rejectHandleFlag(parsed, "shopq product get <id-or-title>")) return;
 	const idOrTitle = parsed.args.join(" ");
 	if (!idOrTitle) {
 		formatError("Usage: shopq product get <id-or-title>");
@@ -309,6 +346,13 @@ function outputProduct(
 		alt: e.node.altText ?? "",
 	}));
 
+	const metafields = product.metafields.edges.map((e) => ({
+		namespace: e.node.namespace,
+		key: e.node.key,
+		type: e.node.type,
+		value: e.node.value,
+	}));
+
 	if (parsed.flags.json) {
 		const data = {
 			id: product.id,
@@ -318,6 +362,8 @@ function outputProduct(
 			vendor: product.vendor,
 			tags: product.tags,
 			description: stripHtml(product.descriptionHtml),
+			category: product.category,
+			metafields,
 			variants: product.variants.edges.map((e) => ({
 				id: e.node.id,
 				sku: e.node.sku,
@@ -343,7 +389,18 @@ function outputProduct(
 	lines.push(`${label("Type")}: ${product.productType}`);
 	lines.push(`${label("Vendor")}: ${product.vendor}`);
 	lines.push(`${label("Tags")}: ${product.tags.join(", ")}`);
+	lines.push(`${label("Category")}: ${product.category?.name ?? ""}`);
 	lines.push(`${label("Description")}: ${truncate(plainDesc, 80)}`);
+
+	lines.push("");
+	lines.push(`${label("Metafields")}:`);
+	if (metafields.length === 0) {
+		lines.push("  (none)");
+	} else {
+		for (const mf of metafields) {
+			lines.push(`  ${mf.namespace}.${mf.key}: ${mf.value}`);
+		}
+	}
 
 	lines.push("");
 	lines.push(`${label("Variants")}:`);

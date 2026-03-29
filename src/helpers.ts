@@ -8,6 +8,7 @@ import {
 	resolveConfig,
 } from "./graphql";
 import { formatError } from "./output";
+import type { ParsedArgs } from "./types";
 
 /**
  * Create a GraphQL client from parsed flags.
@@ -39,6 +40,22 @@ export function handleCommandError(err: unknown): void {
 		throw err;
 	}
 	throw new Error(String(err));
+}
+
+/**
+ * Check if the user passed --handle as a flag instead of a positional arg.
+ * Returns true (and sets error + exit code) if the flag was misused.
+ * Callers should return early when this returns true.
+ */
+export function rejectHandleFlag(parsed: ParsedArgs, usage: string): boolean {
+	if (parsed.args.length === 0 && parsed.flags.handle) {
+		formatError(
+			`--handle is not a flag for this command. Pass the identifier as a positional argument: ${usage}`,
+		);
+		process.exitCode = 2;
+		return true;
+	}
+	return false;
 }
 
 /**

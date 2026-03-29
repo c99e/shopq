@@ -220,4 +220,15 @@ describe("shopq collection get", () => {
 		expect(stderr).toContain("Usage");
 		expect(exitCode).toBe(2);
 	});
+
+	test("--handle without positional arg produces helpful error", async () => {
+		const { stderr, exitCode } = await run([
+			"collection",
+			"get",
+			"--handle",
+			"summer-sale",
+		]);
+		expect(stderr).toContain("positional");
+		expect(exitCode).toBe(2);
+	});
 });

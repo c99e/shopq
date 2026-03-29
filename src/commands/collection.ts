@@ -1,4 +1,9 @@
-import { clampLimit, getClient, handleCommandError } from "../helpers";
+import {
+	clampLimit,
+	getClient,
+	handleCommandError,
+	rejectHandleFlag,
+} from "../helpers";
 import { formatError, formatOutput } from "../output";
 import { register } from "../registry";
 import type { ParsedArgs } from "../types";
@@ -59,6 +64,7 @@ function truncate(str: string, max: number): string {
 }
 
 async function handleCollectionGet(parsed: ParsedArgs): Promise<void> {
+	if (rejectHandleFlag(parsed, "shopq collection get <id-or-handle>")) return;
 	const idOrHandle = parsed.args.join(" ");
 	if (!idOrHandle) {
 		formatError("Usage: shopq collection get <id-or-handle>");

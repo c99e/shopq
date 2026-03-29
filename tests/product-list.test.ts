@@ -14,6 +14,8 @@ const MOCK_PRODUCTS = [
 			vendor: "Acme",
 			variantsCount: { count: 3 },
 			totalInventory: 100,
+			category: { id: "gid://shopify/TaxonomyCategory/1", name: "Widgets" },
+			featuredImage: { url: "https://cdn.shopify.com/widget.jpg" },
 		},
 	},
 	{
@@ -25,6 +27,8 @@ const MOCK_PRODUCTS = [
 			vendor: "Globex",
 			variantsCount: { count: 1 },
 			totalInventory: 0,
+			category: null,
+			featuredImage: null,
 		},
 	},
 ];
@@ -138,6 +142,19 @@ describe("shopq product list", () => {
 		expect(stdout).toContain("Vendor");
 		expect(stdout).toContain("Variants");
 		expect(stdout).toContain("Inventory");
+		expect(stdout).toContain("Category");
+		expect(stdout).toContain("Image");
+	});
+
+	test("table output shows category name when present", async () => {
+		const { stdout } = await run(["product", "list", "--no-color"]);
+		expect(stdout).toContain("Widgets");
+	});
+
+	test("table output shows image indicator", async () => {
+		const { stdout } = await run(["product", "list", "--no-color"]);
+		expect(stdout).toContain("Yes");
+		expect(stdout).toContain("No");
 	});
 
 	test("table shows pagination hint when more results", async () => {
@@ -159,6 +176,10 @@ describe("shopq product list", () => {
 		expect(parsed.data[0].vendor).toBe("Acme");
 		expect(parsed.data[0].variantsCount).toBe(3);
 		expect(parsed.data[0].totalInventory).toBe(100);
+		expect(parsed.data[0].category).toBe("Widgets");
+		expect(parsed.data[0].hasImage).toBe(true);
+		expect(parsed.data[1].category).toBeNull();
+		expect(parsed.data[1].hasImage).toBe(false);
 		expect(parsed.pageInfo).toEqual({
 			hasNextPage: true,
 			endCursor: "cursor-page2",
